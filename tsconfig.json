@@ -8,8 +8,8 @@
         "strict": true,
         "esModuleInterop": true,
         "outDir": "dist",
-        "types": ["reflect-metadata"],
-        "lib": ["es2022"]
+        // "types": ["reflect-metadata"],
+        // "lib": ["es2022"]
     },
-    "include": ["src/**/*.ts"]
+    "include": ["src/**/*"]
 }
