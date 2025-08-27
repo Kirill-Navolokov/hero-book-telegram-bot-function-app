@@ -41,10 +41,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         }
     } else if(body.callback_query) {
         const request = body.callback_query.data;
-        await sendMessage({
-            chat_id: body.callback_query.message.chat.id,
-            text: `You asked to: ${request}`
-        });
+
 
         if(request == 'get_random_wod') {
             const wodsRepo = await iocContainer.getAsync<WodsRepository>(TYPES.WodsRepo);
@@ -54,6 +51,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 chat_id: body.callback_query.message.chat.id,
                 text: JSON.stringify(wod)
             })
+        } else {
+            await sendMessage({
+                chat_id: body.callback_query.message.chat.id,
+                text: `You asked to: ${request}`
+            });
         }
     }
 
