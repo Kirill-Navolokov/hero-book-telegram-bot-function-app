@@ -38,13 +38,8 @@ jobs:
           aws-region: eu-north-1   # change if needed
 
       - name: Deploy to AWS Lambda
-        # uses: aws-actions/aws-cli@v2
-        # with:
-        #   aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        #   aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        #   aws-region: eu-north-1
-        #   args: lambda update-function-code --function-name hero-book-dev-fa --zip-file fileb://function.zip
         run: |
           aws lambda update-function-code \
             --function-name hero-book-dev-fa \
+            --handler handler.handler \
             --zip-file fileb://function.zip
