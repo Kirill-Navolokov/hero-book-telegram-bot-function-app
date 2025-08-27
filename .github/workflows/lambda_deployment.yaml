@@ -34,7 +34,9 @@ jobs:
 
       - name: Zip Lambda package
         run: |
-          zip -r function.zip dist node_modules
+          rm -f function.zip
+          (cd dist && zip -r ../function.zip .)
+          zip -r function.zip node_modules
         # run: |
         #   mkdir -p package
         #   cp dist/handler.js package/
