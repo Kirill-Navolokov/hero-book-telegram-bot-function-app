@@ -2,6 +2,9 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import fetch from "node-fetch";
 import BotResponseMessage from "./models/botResponseMessage";
 import { send } from "process";
+import { iocContainer } from "./ioc/container";
+import { WodsRepository } from "./repositories/wodsRepository";
+import { TYPES } from "./ioc/typesMap";
 
 const TOKEN = process.env.TELEGRAM_TOKEN!;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
@@ -37,10 +40,21 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             });
         }
     } else if(body.callback_query) {
+        const request = body.callback_query.data;
         await sendMessage({
             chat_id: body.callback_query.message.chat.id,
-            text: `You asked to: ${body.callback_query.data}`
-        })
+            text: `You asked to: ${request}`
+        });
+
+        if(request == 'get_random_wod') {
+            const wodsRepo = await iocContainer.getAsync<WodsRepository>(TYPES.WodsRepo);
+            const wod = await wodsRepo.getRandomWod();
+
+            await sendMessage({
+                chat_id: body.callback_query.message.chat.id,
+                text: JSON.stringify(wod)
+            })
+        }
     }
 
     return { statusCode: 200, body: JSON.stringify({ ok: true }) };
