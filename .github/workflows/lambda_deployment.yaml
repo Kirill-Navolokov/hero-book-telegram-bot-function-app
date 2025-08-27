@@ -39,6 +39,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-north-1   # change if needed
 
+      - name: Update AWS Lambda environment
+        run: |
+          aws lambda update-function-configuration \
+            --function-name hero-book-dev-fa \
+            --environment "Variables={
+              NODE_ENV=dev,
+              TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }},
+              MONGO_CONNECTION_STRING=${{ secrets.MONGO_CONNECTION_STRING }}
+            }"
+
       - name: Deploy to AWS Lambda
         run: |
           aws lambda update-function-code \
