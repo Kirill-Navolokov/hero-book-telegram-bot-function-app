@@ -25,8 +25,15 @@ jobs:
         run: npm run build
 
       - name: Zip Lambda package
+        # run: |
+        #   cd dist
+        #   zip -r ../function.zip .
+        #   cd ..
         run: |
-          cd dist
+          mkdir package
+          cp -r dist/* package/
+          cp package.json package-lock.json package/   # if you need deps
+          cd package
           zip -r ../function.zip .
           cd ..
       
