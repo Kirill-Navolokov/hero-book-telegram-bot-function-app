@@ -25,10 +25,6 @@ jobs:
         run: npm run build
 
       - name: Zip Lambda package
-        # run: |
-        #   cd dist
-        #   zip -r ../function.zip .
-        #   cd ..
         run: |
           mkdir -p package
           cp dist/handler.js package/
