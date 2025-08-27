@@ -54,7 +54,9 @@ jobs:
             --environment "Variables={
               NODE_ENV=dev,
               TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }},
-              MONGO_CONNECTION_STRING=${{ secrets.MONGO_CONNECTION_STRING }}
+              MONGO_CONNECTION_STRING=${{ secrets.MONGO_CONNECTION_STRING }},
+              DB_NAME=${{ vars.DB_NAME }},
+              DB_WODS_COLLECTION=${{ vars.DB_WODS_COLLECTION }}
             }"
 
       - name: Deploy to AWS Lambda
