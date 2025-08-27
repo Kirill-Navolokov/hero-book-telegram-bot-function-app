@@ -1,6 +1,13 @@
 name: Deploy Telegram Bot to AWS Lambda
 
 on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        type: choice
+        options: [DEV, PROD]
+        required: true
   push:
     branches:
       - develop   # deploy when pushing to develop branch
@@ -8,6 +15,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
 
     steps:
       - name: Checkout repository
