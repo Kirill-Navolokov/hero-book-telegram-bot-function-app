@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import fetch from "node-fetch";
 import BotResponseMessage from "./models/botResponseMessage";
+import { send } from "process";
 
 const TOKEN = process.env.TELEGRAM_TOKEN!;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
@@ -30,13 +31,16 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             else
                 await greetUnknownUser(chatId, userName);
         } else {
-        await sendMessage(
-            {
+        await sendMessage({
                 chat_id: chatId,
-                text: body.message.text != "" ?`You said: ${text}`
-                    : body.callback_query.data
+                text: `You said: ${text}`
             });
         }
+    } else if(body.callback_query) {
+        await sendMessage({
+            callback_query_id: body.callback_query.id,
+            text: `You asked to: ${body.callback_query.data}`
+        })
     }
 
     return { statusCode: 200, body: JSON.stringify({ ok: true }) };
