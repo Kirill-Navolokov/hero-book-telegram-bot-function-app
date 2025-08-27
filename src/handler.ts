@@ -38,7 +38,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         }
     } else if(body.callback_query) {
         await sendMessage({
-            callback_query_id: body.callback_query.id,
+            chat_id: body.callback_query.message.chat.id,
             text: `You asked to: ${body.callback_query.data}`
         })
     }
