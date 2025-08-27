@@ -42,7 +42,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return { statusCode: 200, body: JSON.stringify({ ok: true }) };
 };
 
-const knowsUsers = new Set(["kyrylo_navolokov"]);
+const knowsUsers = new Set<string>();
 
 async function greetKnownUser(chatId: string, userName: string): Promise<fetch.Response> {
     let responseMessage: BotResponseMessage = {
