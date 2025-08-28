@@ -1,10 +1,11 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import fetch from "node-fetch";
-import { iocContainer } from "./ioc/container";
+// import { iocContainer } from "./ioc/container";
 import { WodsRepository } from "./repositories/wodsRepository";
-import { TYPES } from "./ioc/typesMap";
+// import { TYPES } from "./ioc/typesMap";
 import BotPhotoResponse from "./models/botPhotoResponse";
 import BotTextResponse from "./models/botTextResponse";
+import { getDb } from "./db";
 
 const TOKEN = process.env.TELEGRAM_TOKEN!;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
@@ -28,7 +29,8 @@ async function sendPhoto(responseMessage: BotPhotoResponse): Promise<fetch.Respo
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     if (!event.body)
         return { statusCode: 400, body: "No body" };
-    const wodsRepo = await iocContainer.getAsync<WodsRepository>(TYPES.WodsRepo);
+    //const wodsRepo = await iocContainer.getAsync<WodsRepository>(TYPES.WodsRepo);
+    const wodsRepo = new WodsRepository(await getDb());
 
     const body = JSON.parse(event.body);
 
