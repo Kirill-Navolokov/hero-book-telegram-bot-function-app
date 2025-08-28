@@ -44,7 +44,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
         if(request == 'get_random_wod') {
             const wodsRepo = await iocContainer.getAsync<WodsRepository>(TYPES.WodsRepo);
-            const wod = await wodsRepo.getRandomWod();
+            let wod = await wodsRepo.getRandomWod();
 
             await sendMessage({
                 chat_id: body.callback_query.message.chat.id,
