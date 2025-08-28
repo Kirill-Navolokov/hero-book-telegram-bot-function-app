@@ -16,9 +16,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     if (body.message) {
         const chatId = body.message.chat.id;
-        const text = body.message.text || "";
+        const text = (body.message.text as string) || "";
 
-        if (text === botCommands.start) {
+        if (text == botCommands.start) {
             let userName = body.message.from.username;
             if(knowsUsers.has(userName))
                 await greetKnownUser(chatId, userName);
