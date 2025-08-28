@@ -35,21 +35,38 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             });
         }
     } else if(body.callback_query) {
-        const request = body.callback_query.data;
-        const chatId = body.callback_query.message.chat.id;
-
-        if(request == botCommands.randomWod) {
-            await sendRandomWod(chatId);
-        } else {
-            await sendMessage({
-                chat_id: chatId,
-                text: `You asked to: ${request}`
-            });
-        }
+        await handleCallbackQuery(body.callback_query);
     }
 
     return { statusCode: 200, body: JSON.stringify({ ok: true }) };
 };
+
+
+async function handleCallbackQuery(callbackQuery: any): Promise<void> {
+    const request = callbackQuery.data;
+    const chatId = callbackQuery.message.chat.id;
+
+    if(request == botCommands.randomWod) {
+        await sendRandomWod(chatId);
+    } else if(request == botCommands.registerUnit) {
+        await sendMessage({
+            chat_id: chatId,
+            text: strings.unitRegistrationExplanation,
+            reply_markup: {
+                force_reply: true,
+                selective: true,
+                input_field_placeholder: strings.unitRegistrationTemplate
+            }
+        });
+    } else if(request == botCommands.registerVeteranBusiness) {
+        await sendMessage({
+            chat_id: chatId,
+            text: ''
+        });
+    } else {
+        await sendMessage({chat_id: chatId, text: strings.unknownRequest(request)});
+    }
+}
 
 const knowsUsers = new Set<string>();
 
@@ -92,7 +109,6 @@ async function sendRandomWod(chatId: string) : Promise<fetch.Response> {
     return await sendPhoto({
         chat_id: chatId,
         photo: wod.imageUrl,
-        //caption: `${wod.name}\nДата виконання: ${wod.executionDate.toLocaleDateString("uk-UA", {month:'long',day:'numeric'})}\n\nСхема:\n${wod.scheme}`
         caption: strings.wodMessageTemplate(wod.name, wod.executionDate, wod.scheme)
     });
 }
