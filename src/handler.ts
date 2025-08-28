@@ -1,39 +1,16 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import fetch from "node-fetch";
-// import { iocContainer } from "./ioc/container";
 import { WodsRepository } from "./repositories/wodsRepository";
-// import { TYPES } from "./ioc/typesMap";
-import BotPhotoResponse from "./models/botPhotoResponse";
 import BotTextResponse from "./models/botTextResponse";
-import { getDb } from "./db";
 import { MongoClient } from "mongodb";
-
-const TOKEN = process.env.TELEGRAM_TOKEN!;
-const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
-
-async function sendMessage(responseMessage: BotTextResponse): Promise<fetch.Response> {
-    return await fetch(`${TELEGRAM_API}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(responseMessage),
-    });
-}
-
-async function sendPhoto(responseMessage: BotPhotoResponse): Promise<fetch.Response> {
-    return await fetch(`${TELEGRAM_API}/sendPhoto`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(responseMessage),
-    });
-}
+import { sendMessage, sendPhoto } from "./bot/botService";
+import { botCommands } from "./bot/commands";
 
 const mongoClient = new MongoClient(process.env.MONGO_CONNECTION_STRING!);
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     if (!event.body)
         return { statusCode: 400, body: "No body" };
-    //const wodsRepo = await iocContainer.getAsync<WodsRepository>(TYPES.WodsRepo);
-    //const wodsRepo = new WodsRepository(await getDb());
 
     const body = JSON.parse(event.body);
 
@@ -41,18 +18,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         const chatId = body.message.chat.id;
         const text = body.message.text || "";
 
-        if (text === "/start") {
+        if (text === botCommands.start) {
             let userName = body.message.from.username;
             if(knowsUsers.has(userName))
                 await greetKnownUser(chatId, userName);
             else
                 await greetUnknownUser(chatId, userName);
         }
-         else if(text == "/randomwod") {
+         else if(text == botCommands.randomWod) {
             await sendRandomWod(chatId);
-        }
-         else {
-        await sendMessage({
+        } else {
+            await sendMessage({
                 chat_id: chatId,
                 text: `You said: ${text}`
             });
