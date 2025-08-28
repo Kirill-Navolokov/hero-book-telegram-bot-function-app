@@ -16,7 +16,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     if (body.message) {
         const chatId = body.message.chat.id;
-        const text = (body.message.text as string) || "";
+        const text = body.message.text || "";
 
         if (text == botCommands.start) {
             let userName = body.message.from.username;
@@ -36,7 +36,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     } else if(body.callback_query) {
         const request = body.callback_query.data;
 
-        if(request == 'get_random_wod') {
+        if(request == botCommands.randomWod) {
             await sendRandomWod(body.callback_query.message.chat.id);
         } else {
             await sendMessage({
@@ -72,7 +72,7 @@ async function greetUnknownUser(chatId: string, userName: string): Promise<fetch
         text: "Схоже, ми ще не знайомі. Я бот Книги Героїв, допомагаю по дрібницях. Чим можу вам допомогти?",
         reply_markup: {
             inline_keyboard: [
-                [{text: 'Дай рандомний воркаут', callback_data: 'get_random_wod'}],
+                [{text: 'Дай рандомний воркаут', callback_data: botCommands.randomWod}],
                 [{text: 'Зараєструвати бізнес', callback_data: 'register_business'}],
                 [{text: 'Зараєструвати підрозділ', callback_data: 'register_unit'}],
                 [{text: 'Чому так мало функціоналу?', callback_data: 'need_more_functions'}],

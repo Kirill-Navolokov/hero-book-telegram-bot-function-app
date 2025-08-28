@@ -8,20 +8,10 @@ const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
 
 export function sendMessage(responseMessage: BotTextResponse): Promise<fetch.Response> {
     return sendToBot('sendMessage', responseMessage);
-    // return await fetch(`${TELEGRAM_API}/sendMessage`, {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify(responseMessage),
-    // });
 }
 
 export function sendPhoto(responseMessage: BotPhotoResponse): Promise<fetch.Response> {
     return sendToBot('sendPhoto', responseMessage);
-    // return await fetch(`${TELEGRAM_API}/sendPhoto`, {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify(responseMessage),
-    // });
 }
 
 function sendToBot(endpoint: string, response: BotResponse): Promise<fetch.Response> {
