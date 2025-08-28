@@ -20,6 +20,7 @@ async function sendMessage(responseMessage: BotResponseMessage): Promise<fetch.R
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     if (!event.body)
         return { statusCode: 400, body: "No body" };
+    const wodsRepo = await iocContainer.getAsync<WodsRepository>(TYPES.WodsRepo);
 
     const body = JSON.parse(event.body);
 
@@ -43,14 +44,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         const request = body.callback_query.data;
 
         if(request == 'get_random_wod') {
-            const wodsRepo = await iocContainer.getAsync<WodsRepository>(TYPES.WodsRepo);
             let wod = await wodsRepo.getRandomWod();
 
             await sendMessage({
                 chat_id: body.callback_query.message.chat.id,
                 parse_mode: 'MarkdownV2',
                 //text: `(${wod.imageUrl})\n*${wod.name}*\nДата виконання: ${wod.executionDate}\n\nСхема:\n${wod.scheme}`
-                text: `*${wod.name}*\nСхема:\n${wod.scheme}`
+                text: `*${wod.name}*`
             })
         } else {
             await sendMessage({
