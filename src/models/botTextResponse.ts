@@ -1,4 +1,4 @@
-import { BotResponse } from "./botResponse";
+import BotResponse from "./botResponse";
 import InlineKeyboardMarkup from "./inlineKeyboardMarkup";
 
 export default interface BotTextResponse extends BotResponse {

@@ -3,8 +3,8 @@ import fetch from "node-fetch";
 import { iocContainer } from "./ioc/container";
 import { WodsRepository } from "./repositories/wodsRepository";
 import { TYPES } from "./ioc/typesMap";
-import BotTextResponse from "./models/BotTextResponse";
 import BotPhotoResponse from "./models/botPhotoResponse";
+import BotTextResponse from "./models/botTextResponse";
 
 const TOKEN = process.env.TELEGRAM_TOKEN!;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
