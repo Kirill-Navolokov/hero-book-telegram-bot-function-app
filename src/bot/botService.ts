@@ -6,7 +6,7 @@ import BotResponse from "../models/botResponse";
 const TOKEN = process.env.TELEGRAM_TOKEN!;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
 
-export async function sendMessage(responseMessage: BotTextResponse): Promise<fetch.Response> {
+export function sendMessage(responseMessage: BotTextResponse): Promise<fetch.Response> {
     return sendToBot(responseMessage);
     // return await fetch(`${TELEGRAM_API}/sendMessage`, {
     //     method: "POST",
@@ -15,7 +15,7 @@ export async function sendMessage(responseMessage: BotTextResponse): Promise<fet
     // });
 }
 
-export async function sendPhoto(responseMessage: BotPhotoResponse): Promise<fetch.Response> {
+export function sendPhoto(responseMessage: BotPhotoResponse): Promise<fetch.Response> {
     return sendToBot(responseMessage);
     // return await fetch(`${TELEGRAM_API}/sendPhoto`, {
     //     method: "POST",
