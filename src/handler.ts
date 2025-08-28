@@ -1,16 +1,24 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import fetch from "node-fetch";
-import BotResponseMessage from "./models/botResponseMessage";
-import { send } from "process";
 import { iocContainer } from "./ioc/container";
 import { WodsRepository } from "./repositories/wodsRepository";
 import { TYPES } from "./ioc/typesMap";
+import BotTextResponse from "./models/BotTextResponse";
+import BotPhotoResponse from "./models/botPhotoResponse";
 
 const TOKEN = process.env.TELEGRAM_TOKEN!;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
 
-async function sendMessage(responseMessage: BotResponseMessage): Promise<fetch.Response> {
+async function sendMessage(responseMessage: BotTextResponse): Promise<fetch.Response> {
     return await fetch(`${TELEGRAM_API}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(responseMessage),
+    });
+}
+
+async function sendPhoto(responseMessage: BotPhotoResponse): Promise<fetch.Response> {
+    return await fetch(`${TELEGRAM_API}/sendPhoto`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(responseMessage),
@@ -46,10 +54,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         if(request == 'get_random_wod') {
             let wod = await wodsRepo.getRandomWod();
 
-            await sendMessage({
+            await sendPhoto({
                 chat_id: body.callback_query.message.chat.id,
+                photo: wod.imageUrl,
                 parse_mode: 'MarkdownV2',
-                text: `*${wod.name}*\n
+                caption: `*${wod.name}*\n
 Дата виконання: ${wod.executionDate.toLocaleDateString("uk-UA", {month:'long',day:'numeric'})}
 Схема:\n${wod.scheme}`
             })
@@ -67,7 +76,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 const knowsUsers = new Set<string>();
 
 async function greetKnownUser(chatId: string, userName: string): Promise<fetch.Response> {
-    let responseMessage: BotResponseMessage = {
+    let responseMessage: BotTextResponse = {
         chat_id: chatId,
         text: "Привіт, " + userName + ", чим можу бути корисний",
         reply_markup: {
@@ -82,7 +91,7 @@ async function greetKnownUser(chatId: string, userName: string): Promise<fetch.R
 }
 
 async function greetUnknownUser(chatId: string, userName: string): Promise<fetch.Response> {
-    let responseMessage: BotResponseMessage = {
+    let responseMessage: BotTextResponse = {
         chat_id: chatId,
         text: "Схоже, ми ще не знайомі. Я бот Книги Героїв, допомагаю по дрібницях. Чим можу вам допомогти?",
         reply_markup: {
