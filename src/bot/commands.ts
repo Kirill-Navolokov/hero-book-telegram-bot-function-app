@@ -1,4 +1,7 @@
 export const botCommands = {
     start: '/start',
-    randomWod: '/randomwod'
+    randomWod: '/randomwod',
+    registerUnit: '/registerunit',
+    registerVeteranBusiness: '/registerveteranbusiness',
+    needMoreFunctionality: '/needmorefunctionality'
 }
