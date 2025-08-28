@@ -108,13 +108,13 @@ async function greetUnknownUser(chatId: string, userName: string): Promise<fetch
 }
 
 async function sendRandomWod(chatId: string) : Promise<fetch.Response> {
-    let wodsRepo = new WodsRepository(mongoClient.db(process.env.DB_NAME))
+    let wodsRepo = new WodsRepository(mongoClient.db(process.env.DB_NAME));
     let wod = await wodsRepo.getRandomWod();
 
     return await sendPhoto({
         chat_id: chatId,
         photo: wod.imageUrl,
-        parse_mode: 'MarkdownV2',
+        //parse_mode: 'MarkdownV2',
         caption: `*${wod.name}*\n
 Дата виконання: ${wod.executionDate.toLocaleDateString("uk-UA", {month:'long',day:'numeric'})}
 Схема:\n${wod.scheme}`

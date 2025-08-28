@@ -20,7 +20,12 @@ export class WodsRepository {
         const collection = this.db.collection<Wod>(process.env.DB_WODS_COLLECTION!);
 
         // Use $sample to get 1 random document
-        const randomWod = await collection.aggregate<Wod>([{ $sample: { size: 1 } }]).toArray();
+        //const randomWod = await collection.aggregate<Wod>([{ $sample: { size: 1 } }]).toArray();
+        const count = await collection.countDocuments();
+        // Step 2: generate random index
+        const randomIndex = Math.floor(Math.random() * count);
+        // Step 3: fetch one document with skip
+        const randomWod = await collection.find().skip(randomIndex).limit(1).toArray();
 
         return randomWod[0];
     }
