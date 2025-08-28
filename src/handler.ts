@@ -90,8 +90,6 @@ async function sendRandomWod(chatId: string) : Promise<fetch.Response> {
     return await sendPhoto({
         chat_id: chatId,
         photo: wod.imageUrl,
-        caption: `${wod.name}\n
-Дата виконання: ${wod.executionDate.toLocaleDateString("uk-UA", {month:'long',day:'numeric'})}
-Схема:\n${wod.scheme}`
+        caption: `${wod.name}\nДата виконання: ${wod.executionDate.toLocaleDateString("uk-UA", {month:'long',day:'numeric'})}\n\nСхема:\n${wod.scheme}`
     });
 }
