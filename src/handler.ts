@@ -6,6 +6,7 @@ import { WodsRepository } from "./repositories/wodsRepository";
 import BotPhotoResponse from "./models/botPhotoResponse";
 import BotTextResponse from "./models/botTextResponse";
 import { getDb } from "./db";
+import { MongoClient } from "mongodb";
 
 const TOKEN = process.env.TELEGRAM_TOKEN!;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
@@ -26,11 +27,13 @@ async function sendPhoto(responseMessage: BotPhotoResponse): Promise<fetch.Respo
     });
 }
 
+const mongoClient = new MongoClient(process.env.MONGO_CONNECTION_STRING!);
+
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     if (!event.body)
         return { statusCode: 400, body: "No body" };
     //const wodsRepo = await iocContainer.getAsync<WodsRepository>(TYPES.WodsRepo);
-    const wodsRepo = new WodsRepository(await getDb());
+    //const wodsRepo = new WodsRepository(await getDb());
 
     const body = JSON.parse(event.body);
 
@@ -46,16 +49,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 await greetUnknownUser(chatId, userName);
         }
          else if(text == "/randomwod") {
-            let wod = await wodsRepo.getRandomWod();
-
-            await sendPhoto({
-                chat_id: body.callback_query.message.chat.id,
-                photo: wod.imageUrl,
-                parse_mode: 'MarkdownV2',
-                caption: `*${wod.name}*\n
-Дата виконання: ${wod.executionDate.toLocaleDateString("uk-UA", {month:'long',day:'numeric'})}
-Схема:\n${wod.scheme}`
-            })
+            await sendRandomWod(chatId);
         }
          else {
         await sendMessage({
@@ -67,16 +61,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         const request = body.callback_query.data;
 
         if(request == 'get_random_wod') {
-            let wod = await wodsRepo.getRandomWod();
-
-            await sendPhoto({
-                chat_id: body.callback_query.message.chat.id,
-                photo: wod.imageUrl,
-                parse_mode: 'MarkdownV2',
-                caption: `*${wod.name}*\n
-Дата виконання: ${wod.executionDate.toLocaleDateString("uk-UA", {month:'long',day:'numeric'})}
-Схема:\n${wod.scheme}`
-            })
+            await sendRandomWod(body.callback_query.message.chat.id);
         } else {
             await sendMessage({
                 chat_id: body.callback_query.message.chat.id,
@@ -120,4 +105,18 @@ async function greetUnknownUser(chatId: string, userName: string): Promise<fetch
     }
 
     return await sendMessage(responseMessage);
+}
+
+async function sendRandomWod(chatId: string) : Promise<fetch.Response> {
+    let wodsRepo = new WodsRepository(mongoClient.db(process.env.DB_NAME))
+    let wod = await wodsRepo.getRandomWod();
+
+    return await sendPhoto({
+        chat_id: chatId,
+        photo: wod.imageUrl,
+        parse_mode: 'MarkdownV2',
+        caption: `*${wod.name}*\n
+Дата виконання: ${wod.executionDate.toLocaleDateString("uk-UA", {month:'long',day:'numeric'})}
+Схема:\n${wod.scheme}`
+    });
 }
