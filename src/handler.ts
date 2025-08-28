@@ -49,7 +49,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             await sendMessage({
                 chat_id: body.callback_query.message.chat.id,
                 parse_mode: 'MarkdownV2',
-                text: `(${wod.imageUrl})\n*${wod.name}*\nДата виконання: ${wod.executionDate}\n\nСхема:\n${wod.scheme}`
+                //text: `(${wod.imageUrl})\n*${wod.name}*\nДата виконання: ${wod.executionDate}\n\nСхема:\n${wod.scheme}`
+                text: `*${wod.name}*`
             })
         } else {
             await sendMessage({
