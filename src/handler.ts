@@ -42,6 +42,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 await greetKnownUser(chatId, userName);
             else
                 await greetUnknownUser(chatId, userName);
+        } else if(text == "/randomwod") {
+            let wod = await wodsRepo.getRandomWod();
+
+            await sendPhoto({
+                chat_id: body.callback_query.message.chat.id,
+                photo: wod.imageUrl,
+                parse_mode: 'MarkdownV2',
+                caption: `*${wod.name}*\n
+Дата виконання: ${wod.executionDate.toLocaleDateString("uk-UA", {month:'long',day:'numeric'})}
+Схема:\n${wod.scheme}`
+            })
         } else {
         await sendMessage({
                 chat_id: chatId,
