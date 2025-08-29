@@ -19,7 +19,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const body = JSON.parse(event.body);
 
     if(!(await validateRequestUser(body)))
-        return { statusCode: 403, body: JSON.stringify({ message: 'Request user validation failed' }) };
+        return { statusCode: 200, body: JSON.stringify({ message: 'Request user validation failed' }) };
 
     if(body.callback_query) {
         await handleCallbackQuery(body.callback_query);
@@ -134,12 +134,6 @@ async function handleReplyMessage(message: any): Promise<void> {
                     {text: 'Відхилити', callback_data: botCommands.registerVeteranBusiness}
                 ]]
             }
-            // reply_markup: {
-            //     inline_keyboard: [[
-            //         {text:'Затвердити'},
-            //         {text:'Відхилити'}
-            //     ]]
-            // }
         });
     } else if (text.startsWith(strings.businessRegistration)) {
 
