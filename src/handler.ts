@@ -82,7 +82,7 @@ async function handleReplyMessage(message: any): Promise<void> {
     //     })
     // })
     // if(text.startsWith(strings.unitRegistration)) {
-    try{
+    
         let a = await sendMessage({
             chat_id: (process.env.HERO_BOOK_ADMIN_GROUP as unknown) as number,
             text: strings.unitRegistrationRequest(message.text, message.from.username),
@@ -95,14 +95,8 @@ async function handleReplyMessage(message: any): Promise<void> {
         });
         await sendMessage({
             chat_id: message.chat.id,
-            text: JSON.stringify(a)
-        })
-    } catch(eror) {
-        await sendMessage({
-            chat_id: message.chat.id,
-            text: JSON.stringify(eror)
-        })
-    }
+            text: JSON.stringify(a.body)
+        });
     // } else if (text.startsWith(strings.businessRegistration)) {
 
     // } else {
