@@ -53,9 +53,7 @@ async function handleCallbackQuery(callbackQuery: any): Promise<void> {
             chat_id: chatId,
             text: strings.unitRegistrationExplanation,
             reply_markup: {
-                force_reply: true,
-                selective: true,
-                input_field_placeholder: strings.unitRegistrationTemplate
+                force_reply: true
             }
         });
     } else if(request == botCommands.registerVeteranBusiness) {
