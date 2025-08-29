@@ -7,6 +7,8 @@ import { sendMessage, sendPhoto } from "./bot/botService";
 import { botCommands } from "./bot/commands";
 import { strings } from "./bot/strings";
 import { send } from "process";
+import { User } from "./models/user";
+import { TelegramAccountsRepository } from "./repositories/telegramAccountsRepository";
 
 const mongoClient = new MongoClient(process.env.MONGO_CONNECTION_STRING!);
 
@@ -15,6 +17,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         return { statusCode: 400, body: "No body" };
 
     const body = JSON.parse(event.body);
+
+    if(!(await validateRequestUser(body)))
+        return { statusCode: 403, body: JSON.stringify({ message: 'Request user validation failed' }) };
 
     if(body.callback_query) {
         await handleCallbackQuery(body.callback_query);
@@ -41,6 +46,53 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     return { statusCode: 200, body: JSON.stringify({ ok: true }) };
 };
+
+async function validateRequestUser(body: any): Promise<boolean> {
+    let user: User | undefined = undefined;
+    let chatId = body.message?.chat?.id ?? body.callback_query.message.chat.id;
+
+    if(body.message) {
+        user = body.message.from as User;
+    }
+    //  else if(body.callback_query) {
+    //     user = body.callback_query.from as User;
+    // }
+
+    if(!user) {
+        await sendMessage({
+            chat_id: chatId,
+            text: strings.cantIdentifyUser
+        });
+        return false;
+    }
+
+    if(user.is_bot) {
+        await sendMessage({
+            chat_id: chatId,
+            text: strings.botsNotAllowed
+        });
+        return false;
+    }
+
+    if(!user.username) {
+        await sendMessage({
+            chat_id: chatId,
+            text: strings.usernameNotDefined
+        });
+        return false;
+    }
+
+    const tgAccountRepo = new TelegramAccountsRepository(mongoClient.db(process.env.DB_NAME));
+    if(await tgAccountRepo.isBanned(user.id)) {
+        await sendMessage({
+            chat_id: chatId,
+            text: strings.userBanned
+        });
+        return false;
+    }
+
+    return true;
+}
 
 
 async function handleCallbackQuery(callbackQuery: any): Promise<void> {
@@ -78,7 +130,7 @@ async function handleReplyMessage(message: any): Promise<void> {
             text: strings.unitRegistrationRequest(message.text, message.from.username),
             reply_markup: {
                 inline_keyboard: [[
-                    {text: 'Затвердити', callback_data: botCommands.randomWod},
+                    {text: 'Затвердити', callback_data: botCommands.randomWod },
                     {text: 'Відхилити', callback_data: botCommands.registerVeteranBusiness}
                 ]]
             }

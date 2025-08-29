@@ -61,7 +61,8 @@ jobs:
               MONGO_CONNECTION_STRING=${{ secrets.MONGO_CONNECTION_STRING }},
               DB_NAME=${{ vars.DB_NAME }},
               DB_WODS_COLLECTION=${{ vars.DB_WODS_COLLECTION }},
-              HERO_BOOK_ADMIN_GROUP=${{ vars.HERO_BOOK_ADMIN_GROUP }}
+              HERO_BOOK_ADMIN_GROUP=${{ vars.HERO_BOOK_ADMIN_GROUP }},
+              DB_TG_BAN_COLLECTION=${{ vars.DB_TG_BAN_COLLECTION }}
             }"
 
       - name: Deploy to AWS Lambda
