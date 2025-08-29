@@ -76,12 +76,12 @@ async function handleReplyMessage(message: any): Promise<void> {
         await sendMessage({
             chat_id: (process.env.HERO_BOOK_ADMIN_GROUP as unknown) as number,
             text: strings.unitRegistrationRequest(message.text, message.from.username),
-            reply_markup: {
-                inline_keyboard: [[
-                    {text:'Затвердити'},
-                    {text:'Відхилити'}
-                ]]
-            }
+            // reply_markup: {
+            //     inline_keyboard: [[
+            //         {text:'Затвердити'},
+            //         {text:'Відхилити'}
+            //     ]]
+            // }
         });
     } else if (text.startsWith(strings.businessRegistration)) {
 
