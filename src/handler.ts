@@ -95,7 +95,7 @@ async function handleReplyMessage(message: any): Promise<void> {
         });
         await sendMessage({
             chat_id: message.chat.id,
-            text: JSON.stringify(a.body)
+            text: JSON.stringify(a)
         })
     } catch(eror) {
         await sendMessage({
