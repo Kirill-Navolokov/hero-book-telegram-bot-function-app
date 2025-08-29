@@ -19,7 +19,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         await handleCallbackQuery(body.callback_query);
     } else if (body.message) {
         if(body.message.reply_to_message) {
-            handleReplyMessage(body.message);
+            await handleReplyMessage(body.message);
         } else {
             const chatId = body.message.chat.id;
             const text = body.message.text || "";
