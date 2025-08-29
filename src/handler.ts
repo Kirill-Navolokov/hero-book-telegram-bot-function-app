@@ -66,21 +66,22 @@ async function handleCallbackQuery(callbackQuery: any): Promise<void> {
 
 async function handleReplyMessage(message: any): Promise<void> {
     const text = message.reply_to_message.text as string;
-    if(text.startsWith(strings.unitRegistration)) {
+    // if(text.startsWith(strings.unitRegistration)) {
         await sendMessage({
             chat_id: (process.env.HERO_BOOK_ADMIN_GROUP as unknown) as number,
             text: strings.unitRegistrationRequest(message.text, message.from.username),
             reply_markup: {
-                inline_keyboard: [
-                    [{text:'Затвердити'}, {text:'Відхилити'}]
-                ]
+                inline_keyboard: [[
+                    {text:'Затвердити'},
+                    {text:'Відхилити'}
+                ]]
             }
         });
-    } else if (text.startsWith(strings.businessRegistration)) {
+    // } else if (text.startsWith(strings.businessRegistration)) {
 
-    } else {
+    // } else {
 
-    }
+    // }
 }
 
 const knowsUsers = new Set<string>();
