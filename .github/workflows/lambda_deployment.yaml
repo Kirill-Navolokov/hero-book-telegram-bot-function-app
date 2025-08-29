@@ -60,7 +60,7 @@ jobs:
               TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }},
               MONGO_CONNECTION_STRING=${{ secrets.MONGO_CONNECTION_STRING }},
               DB_NAME=${{ vars.DB_NAME }},
-              DB_WODS_COLLECTION=${{ vars.DB_WODS_COLLECTION }}
+              DB_WODS_COLLECTION=${{ vars.DB_WODS_COLLECTION }},
               HERO_BOOK_ADMIN_GROUP=${{ vars.HERO_BOOK_ADMIN_GROUP }}
             }"
 
