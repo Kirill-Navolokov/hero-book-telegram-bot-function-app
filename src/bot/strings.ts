@@ -11,10 +11,17 @@ export const strings = {
     wodMessageTemplate: (name: string, date: Date, scheme: string) => {
         return `${name}\nДата виконання: ${date.toLocaleDateString("uk-UA", {month:'long',day:'numeric'})}\n\nСхема:\n${scheme}`;
     },
+    unitRegistration: 'РЕЄСТРАЦІЯ ПІДРОЗДІЛУ',
+    businessRegistration: 'РЕЄСТРАЦІЯ БІЗНЕСУ',
 
-    unitRegistrationExplanation: `Відповіддю на це повідомлення ви зробите запит на рееєстрацію підрозділу.
+    unitRegistrationExplanation: `РЕЄСТРАЦІЯ ПІДРОЗДІЛУ\n
+Відповіддю на це повідомлення ви зробите запит на рееєстрацію підрозділу.
 Назву потім можна буде змінити. Інстаграм та телеграм канал (якщо є) для верифікації
 Відправте повідомлення по цьому шаблону:\n
-Назва:\nIнстаграм акк:\nТелеграм канал:`,
-    unitRegistrationTemplate: `Назва:\nПосилання на інстграм акк:\nПосилання на тг канал (якщо є):`
+Назва:\nIнстаграм:\nТелеграм канал:`,
+    unitRegistrationTemplate: `Назва:\nПосилання на інстграм акк:\nПосилання на тг канал (якщо є):`,
+
+    unitRegistrationRequest: (requestInfo: string, contact: string) => {
+        return `ЗАПИТ НА ПІДРОЗДІЛ:\n\nКОНТАКТ:${contact}\n\n${requestInfo}`;
+    }
 }

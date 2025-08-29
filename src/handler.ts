@@ -15,27 +15,27 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     const body = JSON.parse(event.body);
 
-    if (body.message) {
-        const chatId = body.message.chat.id;
-        const text = body.message.text || "";
-
-        if (text == botCommands.start) {
-            let userName = body.message.from.username;
-            if(knowsUsers.has(userName))
-                await greetKnownUser(chatId, userName);
-            else
-                await greetUnknownUser(chatId, userName);
-        }
-         else if(text == botCommands.randomWod) {
-            await sendRandomWod(chatId);
-        } else {
-            await sendMessage({
-                chat_id: chatId,
-                text: `You said: ${text}`
-            });
-        }
-    } else if(body.callback_query) {
+    if(body.callback_query) {
         await handleCallbackQuery(body.callback_query);
+    } else if (body.message) {
+        if(body.message.reply_to_message) {
+
+        } else {
+            const chatId = body.message.chat.id;
+            const text = body.message.text || "";
+
+            if (text == botCommands.start) {
+                let userName = body.message.from.username;
+                if(knowsUsers.has(userName))
+                    await greetKnownUser(chatId, userName);
+                else
+                    await greetUnknownUser(chatId, userName);
+            } else if(text == botCommands.randomWod) {
+                await sendRandomWod(chatId);
+            } else {
+                await sendMessage({chat_id: chatId, text: `You said: ${text}`});
+            }
+        }
     }
 
     return { statusCode: 200, body: JSON.stringify({ ok: true }) };
@@ -52,9 +52,7 @@ async function handleCallbackQuery(callbackQuery: any): Promise<void> {
         await sendMessage({
             chat_id: chatId,
             text: strings.unitRegistrationExplanation,
-            reply_markup: {
-                force_reply: true
-            }
+            reply_markup: {force_reply: true}
         });
     } else if(request == botCommands.registerVeteranBusiness) {
         await sendMessage({
@@ -63,6 +61,25 @@ async function handleCallbackQuery(callbackQuery: any): Promise<void> {
         });
     } else {
         await sendMessage({chat_id: chatId, text: strings.unknownRequest(request)});
+    }
+}
+
+async function handleReplyMessage(message: any): Promise<void> {
+    const text = message.reply_to_message.text as string;
+    if(text.startsWith(strings.unitRegistration)) {
+        await sendMessage({
+            chat_id: process.env.HERO_BOOK_ADMIN_GROUP,
+            text: strings.unitRegistrationRequest(message.text, message.from.username),
+            reply_markup: {
+                inline_keyboard: [
+                    [{text:'Затвердити'}, {text:'Відхилити'}]
+                ]
+            }
+        });
+    } else if (text.startsWith(strings.businessRegistration)) {
+
+    } else {
+
     }
 }
 
