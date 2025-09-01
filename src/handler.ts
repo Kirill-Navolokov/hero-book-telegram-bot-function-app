@@ -91,6 +91,11 @@ async function validateRequestUser(body: any): Promise<boolean> {
         return false;
     }
 
+    await sendMessage({
+            chat_id: chatId,
+            text: `   username:   ${user.username}`
+        });
+
     if(user.username == undefined) {
         await sendMessage({
             chat_id: chatId,
@@ -113,7 +118,7 @@ async function handleCallbackQuery(callbackQuery: any): Promise<void> {
     } else if(request == botCommands.registerUnit) {
         await sendMessage({
             chat_id: chatId,
-            text: strings.unitRegistrationExplanation + `   username:   ${callbackQuery.from.username}`,
+            text: strings.unitRegistrationExplanation,
             reply_markup: {force_reply: true}
         });
     } else if(request == botCommands.registerVeteranBusiness) {
