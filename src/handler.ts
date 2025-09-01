@@ -17,8 +17,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         return { statusCode: 400, body: "No body" };
 
     const body = JSON.parse(event.body);
+    const isValidUser = await validateRequestUser(body);
 
-    if(!(await validateRequestUser(body)))
+    if(!isValidUser)
         return { statusCode: 200, body: JSON.stringify({ message: 'Request user validation failed' }) };
 
     if(body.callback_query) {
