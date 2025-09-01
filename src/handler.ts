@@ -72,14 +72,10 @@ async function validateRequestUser(body: any): Promise<boolean> {
         }
     }
 
-    const isPublicRequest = message == botCommands.start || message == botCommands.randomWod || message == botCommands.needMoreFunctionality;
-    if(isPublicRequest) {
-        await sendMessage({
-            chat_id: chatId,
-            text: message
-        });
+    if(message == botCommands.start || 
+        message == botCommands.randomWod || 
+        message == botCommands.needMoreFunctionality)
         return true;
-    }
 
     if(!user) {
         await sendMessage({
@@ -97,11 +93,6 @@ async function validateRequestUser(body: any): Promise<boolean> {
         return false;
     }
 
-    await sendMessage({
-        chat_id: chatId,
-        text: `   username:   ${user.username}`
-    });
-
     if(user.username == undefined) {
         await sendMessage({
             chat_id: chatId,
@@ -109,12 +100,6 @@ async function validateRequestUser(body: any): Promise<boolean> {
         });
         return false;
     }
-
-    await sendMessage({
-        chat_id: chatId,
-        text: `i'm here`
-    });
-
 
     return true;
 }
