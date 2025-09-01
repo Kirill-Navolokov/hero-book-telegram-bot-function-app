@@ -76,7 +76,7 @@ async function validateRequestUser(body: any): Promise<boolean> {
     if(message == botCommands.start || message == botCommands.randomWod || botCommands.needMoreFunctionality) {
         await sendMessage({
         chat_id: chatId,
-        text: `i'm here 2`
+        text: message
     });
         return true;
     }
