@@ -91,7 +91,7 @@ async function validateRequestUser(body: any): Promise<boolean> {
         return false;
     }
 
-    if(!user.username) {
+    if(user.username == undefined) {
         await sendMessage({
             chat_id: chatId,
             text: strings.usernameNotDefined
