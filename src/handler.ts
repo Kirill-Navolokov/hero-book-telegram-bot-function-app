@@ -93,9 +93,9 @@ async function validateRequestUser(body: any): Promise<boolean> {
     }
 
     await sendMessage({
-            chat_id: chatId,
-            text: `   username:   ${user.username}`
-        });
+        chat_id: chatId,
+        text: `   username:   ${user.username}`
+    });
 
     if(user.username == undefined) {
         await sendMessage({
@@ -104,6 +104,12 @@ async function validateRequestUser(body: any): Promise<boolean> {
         });
         return false;
     }
+
+    await sendMessage({
+        chat_id: chatId,
+        text: `i'm here`
+    });
+
 
     return true;
 }
