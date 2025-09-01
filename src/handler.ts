@@ -113,7 +113,7 @@ async function handleCallbackQuery(callbackQuery: any): Promise<void> {
     } else if(request == botCommands.registerUnit) {
         await sendMessage({
             chat_id: chatId,
-            text: strings.unitRegistrationExplanation,
+            text: strings.unitRegistrationExplanation + `   username:   ${callbackQuery.from.username}`,
             reply_markup: {force_reply: true}
         });
     } else if(request == botCommands.registerVeteranBusiness) {
