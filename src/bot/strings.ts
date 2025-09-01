@@ -16,6 +16,7 @@ export const strings = {
     botsNotAllowed: 'Мені заборонено спілкуватись із ботами.',
     usernameNotDefined: 'Будь ласка, встановіть імʼя користувача в налаштуваннях і спробуйте ще раз. Нам буде легше комунікувати.',
     userBanned: 'Ви забанені. Наразі не можу нічим допомогти.',
+    downloadApps: `Щоб отримати більше функціоналу, будь ласка, завантажте наш застосунок:\niOS: ТУТ ПОСИЛАННЯ НА АЙОС\nANDROID: ТУТ ПОСИЛАННЯ НА АНДРОЇД.`,
 
     unitRegistrationRequest: (requestInfo: string, contact: string) => {
         return `ЗАПИТ НА ПІДРОЗДІЛ:\n\nКОНТАКТ:${contact}\n\n${requestInfo}`;

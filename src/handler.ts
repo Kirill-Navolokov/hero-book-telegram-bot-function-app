@@ -72,7 +72,7 @@ async function validateRequestUser(body: any): Promise<boolean> {
         }
     }
 
-    if(message == botCommands.start || message == botCommands.randomWod)
+    if(message == botCommands.start || message == botCommands.randomWod || botCommands.needMoreFunctionality)
         return true;
 
     if(!user) {
@@ -102,13 +102,14 @@ async function validateRequestUser(body: any): Promise<boolean> {
     return true;
 }
 
-
 async function handleCallbackQuery(callbackQuery: any): Promise<void> {
     const request = callbackQuery.data;
     const chatId = callbackQuery.message.chat.id;
 
     if(request == botCommands.randomWod) {
         await sendRandomWod(chatId);
+    } else if(request == botCommands.needMoreFunctionality) {
+        await sendMessage({chat_id: chatId, text: strings.downloadApps});
     } else if(request == botCommands.registerUnit) {
         await sendMessage({
             chat_id: chatId,
