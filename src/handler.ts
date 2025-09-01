@@ -56,8 +56,7 @@ async function validateRequestUser(body: any): Promise<boolean> {
     if(body.message) {
         user = body.message.from as User;
         message = body.message.text;
-    }
-     else if(body.callback_query) {
+    } else if(body.callback_query) {
         user = body.callback_query.from as User;
         message = body.callback_query.data;
     }
@@ -73,11 +72,12 @@ async function validateRequestUser(body: any): Promise<boolean> {
         }
     }
 
-    if(message == botCommands.start || message == botCommands.randomWod || botCommands.needMoreFunctionality) {
+    const isPublicRequest = message == botCommands.start || message == botCommands.randomWod || message == botCommands.needMoreFunctionality;
+    if(isPublicRequest) {
         await sendMessage({
-        chat_id: chatId,
-        text: message
-    });
+            chat_id: chatId,
+            text: message
+        });
         return true;
     }
 
