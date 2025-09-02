@@ -77,7 +77,7 @@ async function handleReplyMessage(message: any): Promise<void> {
     const chatId = message.chat.id;
 
     if(text.startsWith(strings.unitRegistration)) {
-        await handleUnitRegistration(user, chatId, text);
+        await handleUnitRegistration(user, chatId, message.text);
     } else if (text.startsWith(strings.businessRegistration)) {
         //await handleBusinessRegistration(user, chatId, text);
     } else {

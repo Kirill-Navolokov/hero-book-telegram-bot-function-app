@@ -10,7 +10,7 @@ import { sendMessage } from "../bot/botService";
 export async function handleUnitRegistration(
     user: User,
     chatId: number,
-    registrationReequest: string
+    registrationRequest: string
 ): Promise<void> {
     const unitsRepo = new UnitsRepository(mongoClient.db(process.env.DB_NAME));
     if(await unitsRepo.userRequestExists(user.id)) {
@@ -27,12 +27,12 @@ export async function handleUnitRegistration(
             userId: user.id,
             userName: user.username!,
             chatId: chatId,
-            request: registrationReequest
+            request: registrationRequest
         });
 
         await sendMessage({
             chat_id: (process.env.HERO_BOOK_ADMIN_GROUP as unknown) as number,
-            text: strings.unitRegistrationRequest(registrationReequest, user.username!),
+            text: strings.unitRegistrationRequest(registrationRequest, user.username!),
             reply_markup: {
                 inline_keyboard: [[
                     {text: strings.approve, callback_data: botCommands.approveQuery(unitRegistration._id, 'unit') },
