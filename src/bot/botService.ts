@@ -11,6 +11,23 @@ import { botCommands } from "./commands";
 const TOKEN = process.env.TELEGRAM_TOKEN!;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
 
+export async function greetUser(chatId: string): Promise<fetch.Response> {
+    let responseMessage: BotTextResponse = {
+        chat_id: chatId,
+        text: strings.greetUnknownUser,
+        reply_markup: {
+            inline_keyboard: [
+                [{text: strings.getRandomWod, callback_data: botCommands.randomWod}],
+                [{text: strings.reginsterVeteranBusiness, callback_data: botCommands.registerVeteranBusiness}],
+                [{text: strings.registerUnit, callback_data: botCommands.registerUnit}],
+                [{text: strings.needMoreFunctionality, callback_data: botCommands.needMoreFunctionality}],
+            ]
+        }
+    }
+
+    return await sendMessage(responseMessage);
+}
+
 export async function validateRequestUser(body: any): Promise<boolean> {
     let user: User | undefined = undefined;
     let chatId = body.message?.chat?.id ?? body.callback_query.message.chat.id;

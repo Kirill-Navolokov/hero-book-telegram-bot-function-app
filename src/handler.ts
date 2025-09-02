@@ -1,14 +1,12 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import fetch from "node-fetch";
-import { WodsRepository } from "./repositories/wodsRepository";
-import BotTextResponse from "./models/botTextResponse";
 import { MongoClient } from "mongodb";
-import { sendMessage, sendPhoto, validateRequestUser } from "./bot/botService";
+import { greetUser, sendMessage, validateRequestUser } from "./bot/botService";
 import { botCommands } from "./bot/commands";
 import { strings } from "./bot/strings";
-import { send } from "process";
 import { User } from "./models/user";
-import { TelegramAccountsRepository } from "./repositories/telegramAccountsRepository";
+import { handleUnitRegistration } from "./commandHandlers/unitsHandler";
+import { sendRandomWod } from "./commandHandlers/wodsHandler";
+import test from "node:test";
 
 export const mongoClient = new MongoClient(process.env.MONGO_CONNECTION_STRING!);
 
@@ -20,6 +18,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const isValidUser = await validateRequestUser(body);
 
     if(!isValidUser)
+        // ALSO CHECK IF USER IS KNOWN
         return { statusCode: 200, body: JSON.stringify({ message: 'Request user validation failed' }) };
 
     if(body.callback_query) {
@@ -32,11 +31,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             const text = body.message.text || "";
 
             if (text == botCommands.start) {
-                let userName = body.message.from.username;
-                if(knowsUsers.has(userName))
-                    await greetKnownUser(chatId, userName);
-                else
-                    await greetUnknownUser(chatId, userName);
+                await greetUser(chatId);
             } else if(text == botCommands.randomWod) {
                 await sendRandomWod(chatId);
             } else {
@@ -69,6 +64,8 @@ async function handleCallbackQuery(callbackQuery: any): Promise<void> {
             chat_id: chatId,
             text: ''
         });
+    } else if(request.startsWith(botCommands.registration)) {
+        await sendMessage({chat_id: chatId, text: request });
     } else {
         await sendMessage({chat_id: chatId, text: strings.unknownRequest(request)});
     }
@@ -76,70 +73,14 @@ async function handleCallbackQuery(callbackQuery: any): Promise<void> {
 
 async function handleReplyMessage(message: any): Promise<void> {
     const text = message.reply_to_message.text as string;
-    await sendMessage({
-        chat_id: message.chat.id,
-        text: JSON.stringify(text.startsWith(strings.unitRegistration))
-    });
+    const user = message.from as User;
+    const chatId = message.chat.id;
 
     if(text.startsWith(strings.unitRegistration)) {
-        await sendMessage({
-            chat_id: (process.env.HERO_BOOK_ADMIN_GROUP as unknown) as number,
-            text: strings.unitRegistrationRequest(message.text, message.from.username),
-            reply_markup: {
-                inline_keyboard: [[
-                    {text: 'Затвердити', callback_data: botCommands.randomWod },
-                    {text: 'Відхилити', callback_data: botCommands.registerVeteranBusiness}
-                ]]
-            }
-        });
+        await handleUnitRegistration(user, chatId, text);
     } else if (text.startsWith(strings.businessRegistration)) {
-
+        //await handleBusinessRegistration(user, chatId, text);
     } else {
 
     }
-}
-
-const knowsUsers = new Set<string>();
-
-async function greetKnownUser(chatId: string, userName: string): Promise<fetch.Response> {
-    let responseMessage: BotTextResponse = {
-        chat_id: chatId,
-        text: "Привіт, " + userName + ", чим можу бути корисний",
-        reply_markup: {
-            inline_keyboard: [[
-                { text: 'Зараєструвати бізнес', callback_data: 'register_business' },
-                { text: 'Зараєструвати підрозділ', callback_data: 'register_unit' }
-            ]]
-        }
-    }
-
-    return await sendMessage(responseMessage);
-}
-
-async function greetUnknownUser(chatId: string, userName: string): Promise<fetch.Response> {
-    let responseMessage: BotTextResponse = {
-        chat_id: chatId,
-        text: strings.greetUnknownUser,
-        reply_markup: {
-            inline_keyboard: [
-                [{text: strings.getRandomWod, callback_data: botCommands.randomWod}],
-                [{text: strings.reginsterVeteranBusiness, callback_data: botCommands.registerVeteranBusiness}],
-                [{text: strings.registerUnit, callback_data: botCommands.registerUnit}],
-                [{text: strings.needMoreFunctionality, callback_data: botCommands.needMoreFunctionality}],
-            ]
-        }
-    }
-
-    return await sendMessage(responseMessage);
-}
-
-async function sendRandomWod(chatId: string) : Promise<fetch.Response> {
-    let wodsRepo = new WodsRepository(mongoClient.db(process.env.DB_NAME));
-    let wod = await wodsRepo.getRandomWod();
-
-    return await sendPhoto({
-        chat_id: chatId,
-        photo: wod.imageUrl,
-        caption: strings.wodMessageTemplate(wod.name, wod.executionDate, wod.scheme)
-    });
 }

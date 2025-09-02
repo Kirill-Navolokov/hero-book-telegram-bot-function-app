@@ -17,6 +17,12 @@ export const strings = {
     usernameNotDefined: 'Будь ласка, встановіть імʼя користувача в налаштуваннях і спробуйте ще раз. Нам буде легше комунікувати.',
     userBanned: 'Ви забанені. Наразі не можу нічим допомогти.',
     downloadApps: `Щоб отримати більше функціоналу, будь ласка, завантажте наш застосунок:\niOS: ТУТ ПОСИЛАННЯ НА АЙОС\nANDROID: ТУТ ПОСИЛАННЯ НА АНДРОЇД.`,
+    approve: 'ЗАТВЕРДИТИ',
+    reject: 'ВІДХИЛИТИ',
+    ban: 'БАН',
+    unitRegistrationAccepted: 'Запит на розгляді. Щоб отримати сповіщення не видаляйте цей чат',
+    unitRegistrationExists: 'Ви вже стоврили запит на підрозділ, він на розгляді.',
+    uknownErrorHappend: 'На нашому боці сталась помилка. Працюємо над її виправленням.',
 
     unitRegistrationRequest: (requestInfo: string, contact: string) => {
         return `ЗАПИТ НА ПІДРОЗДІЛ:\n\nКОНТАКТ:${contact}\n\n${requestInfo}`;
