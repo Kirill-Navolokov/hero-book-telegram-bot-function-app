@@ -60,7 +60,7 @@ export async function handleUnitRegistrationResult(
     chatId: string,
     request: string
 ): Promise<void> {
-    const params = new URLSearchParams(request);
+    const params = new URLSearchParams(request.split('?')[1]);
     const requestId = new ObjectId(params.get('requestId')!);
     // const unitsRepo = new UnitsRepository(mongoClient.db(process.env.DB_NAME));
     // const registration = await unitsRepo.getRequest(requestId);
