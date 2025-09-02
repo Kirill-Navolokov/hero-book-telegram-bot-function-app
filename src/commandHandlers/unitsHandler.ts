@@ -64,7 +64,7 @@ export async function handleUnitRegistrationResult(
     const requestId = new ObjectId(params.get('requestId')!);
     // const unitsRepo = new UnitsRepository(mongoClient.db(process.env.DB_NAME));
     // const registration = await unitsRepo.getRequest(requestId);
-    await sendMessage({chat_id: chatId, text: `${requestId.toString}.     -        ${request}`});
+    await sendMessage({chat_id: chatId, text: `${requestId}     -        ${request}`});
     //CHANGE STATUS
     // if(request.includes('approve')) {
     //     await sendMessage({chat_id: chatId, text: 'APPROVED: ' + requestId});
