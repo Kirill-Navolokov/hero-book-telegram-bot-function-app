@@ -62,23 +62,23 @@ export async function handleUnitRegistrationResult(
 ): Promise<void> {
     const params = new URLSearchParams(request.split('?')[1]);
     const requestId = new ObjectId(params.get('requestId')!);
-    // const unitsRepo = new UnitsRepository(mongoClient.db(process.env.DB_NAME));
-    // const registration = await unitsRepo.getRequest(requestId);
-    await sendMessage({chat_id: chatId, text: `${requestId.toString()}     -        ${request}`});
+    const unitsRepo = new UnitsRepository(mongoClient.db(process.env.DB_NAME));
+    const registration = await unitsRepo.getRequest(requestId);
+    //await sendMessage({chat_id: chatId, text: `${requestId.toString()}     -        ${request}`});
     //CHANGE STATUS
-    // if(request.includes('approve')) {
-    //     await sendMessage({chat_id: chatId, text: 'APPROVED: ' + requestId});
-    //     //ADD UNIT ITEM INTO TABLE
-    // } else if (request.includes('reject')) {
-    //     await sendMessage({chat_id: chatId, text: 'REJECTED: ' +requestId});
-    // } else {
-    //     await sendMessage({chat_id: chatId, text: 'BANNED: ' + requestId});
-    //     //ADD TO BANNED USER 
-    // }
+    if(request.includes('approve')) {
+        await sendMessage({chat_id: chatId, text: 'APPROVED: ' + JSON.stringify(registration)});
+        //ADD UNIT ITEM INTO TABLE
+    } else if (request.includes('reject')) {
+        await sendMessage({chat_id: chatId, text: 'REJECTED: ' + JSON.stringify(registration)});
+    } else {
+        await sendMessage({chat_id: chatId, text: 'BANNED: ' + JSON.stringify(registration)});
+        //ADD TO BANNED USER 
+    }
 
     //SEND NOTIFICATION
-    // await sendMessage({
-    //     chat_id: registration.chatId,
-    //     text: 'REQUEST STATUS CHANGED'
-    // });
+    await sendMessage({
+        chat_id: registration.chatId,
+        text: 'REQUEST STATUS CHANGED'
+    });
 }
