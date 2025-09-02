@@ -8,9 +8,9 @@ export const botCommands = {
     needMoreFunctionality: '/needmorefunctionality',
     approveRequest: '/approve',
     rejectRequest: '/reject',
-    banRequest: '/ban',
+    ban: '/ban',
     registration: '/registration',
     approveQuery: (requestId: ObjectId, entType: string) => `/registration/approve/${entType}?requestId=${requestId}`,
     rejectQuery: (requestId: ObjectId, entType: string) => `/registration/reject/${entType}?requestId=${requestId}`,
-    banQuery: (userId: number) => `/ban?userId=${userId}`
+    banQuery: (requestId: ObjectId, entType: string) => `/registration/ban/${entType}?requestId=${requestId}`
 }

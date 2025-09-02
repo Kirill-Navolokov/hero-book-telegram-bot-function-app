@@ -1,4 +1,4 @@
-import { Db } from "mongodb";
+import { Db, ObjectId } from "mongodb";
 import { UnitRegistration } from "../models/unitRegistration";
 
 export class UnitsRepository {
@@ -18,6 +18,13 @@ export class UnitsRepository {
         const uniRegistration = await collection.findOne({userId: userId});
         
         return uniRegistration != null;
+    }
+
+    public async getRequest(id: ObjectId): Promise<UnitRegistration> {
+        const collection = this.db.collection<UnitRegistration>(process.env.DB_UNIT_REQUESTS_COLLECTION!);
+        const registration =  await collection.findOne({_id: id});
+
+        return registration!;
     }
 
 }

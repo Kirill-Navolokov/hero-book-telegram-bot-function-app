@@ -4,7 +4,7 @@ import { greetUser, sendMessage, validateRequestUser } from "./bot/botService";
 import { botCommands } from "./bot/commands";
 import { strings } from "./bot/strings";
 import { User } from "./models/user";
-import { handleUnitRegistration } from "./commandHandlers/unitsHandler";
+import { handleUnitRegistration, handleUnitRegistrationResult } from "./commandHandlers/unitsHandler";
 import { sendRandomWod } from "./commandHandlers/wodsHandler";
 import test from "node:test";
 
@@ -46,7 +46,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
 
 async function handleCallbackQuery(callbackQuery: any): Promise<void> {
-    const request = callbackQuery.data;
+    const request:string = callbackQuery.data;
     const chatId = callbackQuery.message.chat.id;
 
     if(request == botCommands.randomWod) {
@@ -65,7 +65,13 @@ async function handleCallbackQuery(callbackQuery: any): Promise<void> {
             text: ''
         });
     } else if(request.startsWith(botCommands.registration)) {
-        await sendMessage({chat_id: chatId, text: request });
+        if(request.includes('unit')){
+            await handleUnitRegistrationResult(chatId, request);
+        } else {
+            //handle business registration
+        }
+    } else if(request.startsWith(botCommands.ban)) {
+
     } else {
         await sendMessage({chat_id: chatId, text: strings.unknownRequest(request)});
     }

@@ -5,6 +5,7 @@ import { User } from "../models/user";
 import { strings } from "../bot/strings";
 import { botCommands } from "../bot/commands";
 import { sendMessage } from "../bot/botService";
+import { url } from "inspector";
 
 
 export async function handleUnitRegistration(
@@ -37,7 +38,7 @@ export async function handleUnitRegistration(
                 inline_keyboard: [[
                     {text: strings.approve, callback_data: botCommands.approveQuery(unitRegistration._id, 'unit') },
                     {text: strings.reject, callback_data: botCommands.rejectQuery(unitRegistration._id, 'unit')},
-                    {text: strings.ban, callback_data: botCommands.banQuery(user.id)}
+                    {text: strings.ban, callback_data: botCommands.banQuery(unitRegistration._id, 'unit')}
                 ]]
             }
         });
@@ -54,6 +55,29 @@ export async function handleUnitRegistration(
     }
 }
 
-export async function handleUnitRegistrationResult(): Promise<void> {
+export async function handleUnitRegistrationResult(
+    chatId: string,
+    request: string
+): Promise<void> {
+    const params = new URLSearchParams(request);
+    const requestId = new ObjectId(params.get('requestId')!);
+    const unitsRepo = new UnitsRepository(mongoClient.db(process.env.DB_NAME));
+    const registration = await unitsRepo.getRequest(requestId);
 
+    //CHANGE STATUS
+    if(request.includes('approve')) {
+        await sendMessage({chat_id: chatId, text: 'APPROVED: ' + JSON.stringify(registration)});
+        //ADD UNIT ITEM INTO TABLE
+    } else if (request.includes('reject')) {
+        await sendMessage({chat_id: chatId, text: 'REJECTED: ' + JSON.stringify(registration)});
+    } else {
+        await sendMessage({chat_id: chatId, text: 'BANNED: ' + JSON.stringify(registration)});
+        //ADD TO BANNED USER 
+    }
+
+    //SEND NOTIFICATION
+    await sendMessage({
+        chat_id: registration.chatId,
+        text: 'REQUEST STATUS CHANGED'
+    });
 }
