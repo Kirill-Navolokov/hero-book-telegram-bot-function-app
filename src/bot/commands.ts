@@ -10,7 +10,7 @@ export const botCommands = {
     rejectRequest: '/reject',
     ban: '/ban',
     registration: '/registration',
-    approveQuery: (requestId: ObjectId, entType: string) => `/registration/approve/${entType}?requestId=${requestId}`,
-    rejectQuery: (requestId: ObjectId, entType: string) => `/registration/reject/${entType}?requestId=${requestId}`,
-    banQuery: (requestId: ObjectId, entType: string) => `/registration/ban/${entType}?requestId=${requestId}`
+    approveQuery: (requestId: string, entType: string) => `/registration/approve/${entType}?requestId=${requestId}`,
+    rejectQuery: (requestId: string, entType: string) => `/registration/reject/${entType}?requestId=${requestId}`,
+    banQuery: (requestId: string, entType: string) => `/registration/ban/${entType}?requestId=${requestId}`
 }

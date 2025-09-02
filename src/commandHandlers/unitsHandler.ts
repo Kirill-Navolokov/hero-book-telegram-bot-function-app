@@ -30,15 +30,16 @@ export async function handleUnitRegistration(
             chatId: chatId,
             request: registrationRequest
         });
+        const registrationId = unitRegistration._id.toString();
 
         await sendMessage({
             chat_id: (process.env.HERO_BOOK_ADMIN_GROUP as unknown) as number,
             text: strings.unitRegistrationRequest(registrationRequest, user.username!),
             reply_markup: {
                 inline_keyboard: [[
-                    {text: strings.approve, callback_data: botCommands.approveQuery(unitRegistration._id, 'unit') },
-                    {text: strings.reject, callback_data: botCommands.rejectQuery(unitRegistration._id, 'unit')},
-                    {text: strings.ban, callback_data: botCommands.banQuery(unitRegistration._id, 'unit')}
+                    {text: strings.approve, callback_data: botCommands.approveQuery(registrationId, 'unit') },
+                    {text: strings.reject, callback_data: botCommands.rejectQuery(registrationId, 'unit')},
+                    {text: strings.ban, callback_data: botCommands.banQuery(registrationId, 'unit')}
                 ]]
             }
         });
@@ -63,7 +64,7 @@ export async function handleUnitRegistrationResult(
     const requestId = new ObjectId(params.get('requestId')!);
     // const unitsRepo = new UnitsRepository(mongoClient.db(process.env.DB_NAME));
     // const registration = await unitsRepo.getRequest(requestId);
-    await sendMessage({chat_id: chatId, text: ` ${JSON.stringify(params)}        -         ${requestId}`});
+    await sendMessage({chat_id: chatId, text: `${requestId.toString}.     -        ${request}`});
     //CHANGE STATUS
     // if(request.includes('approve')) {
     //     await sendMessage({chat_id: chatId, text: 'APPROVED: ' + requestId});
