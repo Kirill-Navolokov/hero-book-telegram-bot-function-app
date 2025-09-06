@@ -64,8 +64,13 @@ export async function handleUnitRegistrationResult(
 ): Promise<void> {
     // const params = new URLSearchParams(request.split('?')[1]);
     // const requestId = new ObjectId(params.get('requestId')!);
-    const unitReqistration = JSON.parse(request) as UnitRegistration;
-    unitReqistration._id = new ObjectId(unitReqistration._id);
+    const unitReqistration = JSON.parse(request, (key, value) => {
+        if(key == "_id")
+            return new ObjectId(value as string);
+
+        return value;
+    }) as UnitRegistration;
+    //unitReqistration._id = new ObjectId(unitReqistration._id);
     const db = mongoClient.db(process.env.DB_NAME);
     const unitsRepo = new UnitRegistrationsRepository(db);
     const registration = await unitsRepo.get(unitReqistration._id!);
