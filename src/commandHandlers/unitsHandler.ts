@@ -65,9 +65,16 @@ export async function handleUnitRegistrationResult(
     // const params = new URLSearchParams(request.split('?')[1]);
     // const requestId = new ObjectId(params.get('requestId')!);
     const unitReqistration = JSON.parse(request) as UnitRegistration;
+    unitReqistration._id = new ObjectId(unitReqistration._id);
     const db = mongoClient.db(process.env.DB_NAME);
     const unitsRepo = new UnitRegistrationsRepository(db);
     const registration = await unitsRepo.get(unitReqistration._id!);
+
+    await sendMessage({
+        chat_id: chatId,
+        text: JSON.stringify(registration)
+    });
+    return;
     let message;
 
     //CHANGE STATUS
