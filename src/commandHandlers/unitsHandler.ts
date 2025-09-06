@@ -25,7 +25,7 @@ export async function handleUnitRegistration(
 
     try {
         let unitRegistration = await verifyUnitRegistrationRequest(registrationRequest, chatId);
-        if(!unitRegistration)
+        if(unitRegistration == null)
             return;
 
         unitRegistration._id = new ObjectId();
@@ -99,7 +99,7 @@ export async function handleUnitRegistrationResult(
 async function verifyUnitRegistrationRequest(
     registrationRequest: string,
     chatId: number
-): Promise<UnitRegistration|undefined> {
+): Promise<UnitRegistration|null> {
     try {
         const request = JSON.parse(registrationRequest) as UnitRegistration;
         request.chatId = chatId;
@@ -109,6 +109,6 @@ async function verifyUnitRegistrationRequest(
             chat_id: chatId,
             text: JSON.stringify(error)
         });
-        return undefined;
+        return null;
     }
 }
