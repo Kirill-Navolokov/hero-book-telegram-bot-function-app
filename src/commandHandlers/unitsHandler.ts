@@ -36,7 +36,7 @@ export async function handleUnitRegistration(
         await sendMessage({
             chat_id: (process.env.HERO_BOOK_ADMIN_GROUP as unknown) as number,
             //text: strings.unitRegistrationRequest(registrationRequest, user.username!),
-            text: JSON.stringify(unitRegistration),
+            text: JSON.stringify(unitRegistration, undefined, '\n'),
             reply_markup: {
                 inline_keyboard: [
                     [{text: strings.approve + ' ПІДРОЗДІЛ', callback_data: botCommands.approveQuery(registrationId, 'unit') }],
@@ -83,11 +83,11 @@ export async function handleUnitRegistrationResult(
         message = 'Ваш запит на реєстрацію підрозділу було відхилено.';
     } else {
         await sendMessage({chat_id: chatId, text: 'BANNED: ' + JSON.stringify(registration)});
-        // const tgAccountRepository = new TelegramAccountsRepository(db);
-        // await tgAccountRepository.add(registration.userId!);
+        const tgAccountRepository = new TelegramAccountsRepository(db);
+        await tgAccountRepository.add(registration.userId!);
     }
 
-    //await unitsRepo.delete(requestId);
+    //await unitsRepo.delete(registration._id!);
 
     if(!callbackData.includes('ban')) {
         await sendMessage({
