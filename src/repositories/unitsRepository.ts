@@ -1,30 +1,27 @@
-import { Db, ObjectId } from "mongodb";
+import { Db, ObjectId } from "mongodb"
+import { BaseRepository } from "./baseRepository"
 import { UnitRegistration } from "../models/unitRegistration";
+import { Unit } from "../models/unit";
 
-export class UnitsRepository {
-    constructor(private readonly db: Db) {
+export class UnitsRepository extends BaseRepository {
+    constructor(db: Db) {
+        super(db);
     }
 
-    public async addUnitRequest(registrationRequest: UnitRegistration): Promise<UnitRegistration> {
-        const collection = this.db.collection(process.env.DB_UNIT_REQUESTS_COLLECTION!);
-        var result =  await collection.insertOne(registrationRequest, {forceServerObjectId: true});
-        registrationRequest._id = result.insertedId;
-
-        return registrationRequest;
+    protected get collectionName(): string {
+        return process.env.DB_UNITS_COLLECTION!;
     }
 
-    public async userRequestExists(userId: number): Promise<boolean> {
-        const collection = this.db.collection<UnitRegistration>(process.env.DB_UNIT_REQUESTS_COLLECTION!);
-        const uniRegistration = await collection.findOne({userId: userId});
-        
-        return uniRegistration != null;
-    }
+    // public createUnitFromRequest(request: UnitRegistration): Promise<Unit> {
+    //     request.
+    //     let unit: Unit = {
+    //         _id: new ObjectId(),
+    //         isPublished: false,
+    //         name
+    //     }
 
-    public async getRequest(id: ObjectId): Promise<UnitRegistration> {
-        const collection = this.db.collection<UnitRegistration>(process.env.DB_UNIT_REQUESTS_COLLECTION!);
-        const registration =  await collection.findOne({_id: id});
+    //     const collection = this.getCollection();
+    //     unit = await collection.insertOne(unit, {forceServerObjectId: true});
 
-        return registration!;
-    }
-
+    // }
 }

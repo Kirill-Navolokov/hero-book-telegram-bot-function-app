@@ -1,15 +1,18 @@
 import { Db } from "mongodb";
 import { Wod } from "../models/wod";
+import { BaseRepository } from "./baseRepository";
 
-export class WodsRepository {
-    private readonly db: Db;
+export class WodsRepository extends BaseRepository {
+    constructor(db: Db) {
+        super(db);
+    }
 
-    constructor(mongo: Db) {
-        this.db = mongo;
+    protected get collectionName(): string {
+        return process.env.DB_WODS_COLLECTION!;
     }
 
     async getRandomWod(): Promise<Wod> {
-        const collection = this.db.collection<Wod>(process.env.DB_WODS_COLLECTION!);
+        const collection = this.getCollection<Wod>();
         const count = await collection.countDocuments();
         const randomIndex = Math.floor(Math.random() * count);
         const randomWod = await collection.find().skip(randomIndex).limit(1).toArray();
