@@ -60,6 +60,7 @@ export async function handleUnitRegistration(
 
 export async function handleUnitRegistrationResult(
     chatId: string,
+    callbackData: string,
     request: string
 ): Promise<void> {
     let registration = JSON.parse(request, (key, value) => {
@@ -71,13 +72,13 @@ export async function handleUnitRegistrationResult(
     let message;
 
     //CHANGE STATUS
-    if(request.includes('approve')) {
+    if(callbackData.includes('approve')) {
         await sendMessage({chat_id: chatId, text: 'APPROVED: ' + JSON.stringify(registration)});
         message = 'Ваш підрозділ було зареєстровано. Тепер ви зможете його дозаповнити та опублікувати.';
         //ADD UNIT ITEM INTO TABLE
         //await unitsRepo.createUnitFromRequest(registration);
     }
-    else if (request.includes('reject')) {
+    else if (callbackData.includes('reject')) {
         await sendMessage({chat_id: chatId, text: 'REJECTED: ' + JSON.stringify(registration)});
         message = 'Ваш запит на реєстрацію підрозділу було відхилено.';
     } else {
@@ -88,7 +89,7 @@ export async function handleUnitRegistrationResult(
 
     //await unitsRepo.delete(requestId);
 
-    if(!request.includes('ban')) {
+    if(!callbackData.includes('ban')) {
         await sendMessage({
             chat_id: registration.chatId!,
             text: message!

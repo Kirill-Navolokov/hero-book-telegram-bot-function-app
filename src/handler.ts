@@ -6,7 +6,6 @@ import { strings } from "./bot/strings";
 import { User } from "./models/user";
 import { handleUnitRegistration, handleUnitRegistrationResult } from "./commandHandlers/unitsHandler";
 import { sendRandomWod } from "./commandHandlers/wodsHandler";
-import test from "node:test";
 import { UnitRegistration } from "./models/unitRegistration";
 
 export const mongoClient = new MongoClient(process.env.MONGO_CONNECTION_STRING!);
@@ -67,7 +66,7 @@ async function handleCallbackQuery(callbackQuery: any): Promise<void> {
         });
     } else if(request.startsWith(botCommands.registration)) {
         if(request.includes('unit')){
-            await handleUnitRegistrationResult(chatId, callbackQuery.message.text);
+            await handleUnitRegistrationResult(chatId, request, callbackQuery.message.text);
         } else {
             //handle business registration
         }
