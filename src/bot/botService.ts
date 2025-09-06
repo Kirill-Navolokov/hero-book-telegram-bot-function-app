@@ -30,14 +30,16 @@ export async function greetUser(chatId: string): Promise<fetch.Response> {
 
 export async function validateRequestUser(body: any): Promise<boolean> {
     let user: User | undefined = undefined;
-    let chatId = body.message?.chat?.id ?? body.callback_query.message.chat.id;
+    let chatId;
     let message = '';
 
     if(body.message) {
         user = body.message.from as User;
+        chatId = body.message.chat.id;
         message = body.message.text;
     } else if(body.callback_query) {
         user = body.callback_query.from as User;
+        chatId = body.callback_query.message.chat.id;
         message = body.callback_query.data;
     }
 
