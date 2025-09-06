@@ -107,7 +107,7 @@ async function verifyUnitRegistrationRequest(
     } catch(error) {
         await sendMessage({
             chat_id: chatId,
-            text: strings.unitRegistrationWrongFormat
+            text: JSON.stringify(error)
         });
         return null;
     }
