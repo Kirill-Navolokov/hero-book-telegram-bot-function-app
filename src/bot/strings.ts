@@ -12,8 +12,8 @@ export const strings = {
 Відправте повідомлення по цьому шаблону:\n
 {
     "name": "example_unit_name",
-    "adminEmail": "unitAdmin@example.com"
-    "instagramUrl: "example_unit_instagram_url",
+    "adminEmail": "unitAdmin@example.com",
+    "instagramUrl": "example_unit_instagram_url",
     "telegramChannel": "example_unit_channel_link"
 }`,
     unitRegistrationWrongFormat: 'Не правильний формат. Подивіться приклад з повідомлення.',

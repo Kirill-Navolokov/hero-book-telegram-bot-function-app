@@ -99,7 +99,7 @@ export async function handleUnitRegistrationResult(
 async function verifyUnitRegistrationRequest(
     registrationRequest: string,
     chatId: number
-): Promise<UnitRegistration|null> {
+): Promise<UnitRegistration|undefined> {
     try {
         const request = JSON.parse(registrationRequest) as UnitRegistration;
         request.chatId = chatId;
@@ -109,6 +109,6 @@ async function verifyUnitRegistrationRequest(
             chat_id: chatId,
             text: JSON.stringify(error)
         });
-        return null;
+        return undefined;
     }
 }
