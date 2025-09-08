@@ -47,7 +47,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 async function handleCallbackQuery(callbackQuery: any): Promise<void> {
     const request:string = callbackQuery.data;
     const chatId = callbackQuery.message.chat.id;
-    const user = callbackQuery.message.from as User;
+    const user = callbackQuery.from as User;
 
     if(request == botCommands.randomWod) {
         await sendRandomWod(chatId);

@@ -46,7 +46,7 @@ function getStartInlineKeyboard(
         [{text: strings.reginsterVeteranBusiness, callback_data: botCommands.registerVeteranBusiness}]
     ]
 
-    if(!unitRequestUnderReview)
+    if(!unitRequestUnderReview && !unitAdmin)
         keyboardButtons.push([{text: strings.registerUnit, callback_data: botCommands.registerUnit}]);
 
     if(unitAdmin) {
