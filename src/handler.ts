@@ -31,7 +31,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             const text = body.message.text || "";
 
             if (text == botCommands.start) {
-                await greetUser(chatId);
+                await greetUser(chatId, body.message.from.id);
             } else if(text == botCommands.randomWod) {
                 await sendRandomWod(chatId);
             } else {
