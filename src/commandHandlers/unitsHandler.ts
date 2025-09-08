@@ -77,11 +77,11 @@ export async function handleUnitRegistrationResult(
         const unitsRepo = new UnitsRepository(db);
         const newUnit = await unitsRepo.createUnitFromRequest(registration);
 
-        userMessage = 'Ваш підрозділ було зареєстровано. Тепер ви зможете його дозаповнити та опублікувати.';
+        userMessage = strings.unitApproved;
         adminMessage = `Підрозділ ${newUnit.name} створено`;
     }
     else if (callbackData.includes('reject')) {
-        userMessage = 'Ваш запит на реєстрацію підрозділу було відхилено.';
+        userMessage = strings.unitRejected;
         adminMessage = `Запит на підрозділ ${registration.name} віхилено`;
     } else {
         const tgAccountRepository = new TelegramAccountsRepository(db);

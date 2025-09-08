@@ -17,7 +17,6 @@ export const strings = {
     "telegramChannel": "example_unit_channel_link"
 }`,
     unitRegistrationWrongFormat: 'Не правильний формат. Подивіться приклад з повідомлення.',
-    //unitRegistrationTemplate: `Назва:\nПосилання на інстграм акк:\nПосилання на тг канал (якщо є):`,
     cantIdentifyUser: 'Не можу ідентифікувати користувача. Спробуйте ще раз.',
     botsNotAllowed: 'Мені заборонено спілкуватись із ботами.',
     usernameNotDefined: 'Будь ласка, встановіть імʼя користувача в налаштуваннях і спробуйте ще раз. Нам буде легше комунікувати.',
@@ -29,6 +28,8 @@ export const strings = {
     unitRegistrationAccepted: 'Запит на розгляді. Щоб отримати сповіщення не видаляйте цей чат',
     unitRegistrationExists: 'Ви вже стоврили запит на підрозділ, він на розгляді.',
     uknownErrorHappend: 'На нашому боці сталась помилка. Працюємо над її виправленням.',
+    unitApproved: 'Ваш підрозділ було зареєстровано. Тепер ви зможете його дозаповнити та опублікувати.',
+    unitRejected: 'Ваш запит на реєстрацію підрозділу було відхилено.',
 
     unitRegistrationRequest: (requestInfo: string, contact: string) => {
         return `ЗАПИТ НА ПІДРОЗДІЛ:\n\nКОНТАКТ:${contact}\n\n${requestInfo}`;
