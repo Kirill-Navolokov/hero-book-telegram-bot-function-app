@@ -109,14 +109,17 @@ export async function handleUnitManagement(
     request: string): Promise<void> {
 
     if(request == '/management/unit') {
+        // await sendMessage({
+        //         text:'КЕРУВАННЯ ПІДРОЗДІЛОМ',
+        //         chat_id: chatId
+        //     });
         await sendMessage({
             chat_id: chatId,
             text: strings.availableCommands,
             reply_markup: {
-                inline_keyboard: getAdminManagementKeyboard(userId)
+                inline_keyboard: await getAdminManagementKeyboard(userId)
             }
         });
-        return;
     }
 }
 
