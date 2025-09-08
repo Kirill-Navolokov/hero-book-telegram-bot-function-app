@@ -75,9 +75,17 @@ async function handleCallbackQuery(callbackQuery: any): Promise<void> {
             //handle business registration
         }
     } else if(request.startsWith(botCommands.management)) {
-        if(request.includes('unit'))
+        await sendMessage({
+            text:'КЕРУВАННЯ',
+            chat_id: chatId
+        });
+        if(request.includes('unit')) {
+            await sendMessage({
+                text:'КЕРУВАННЯ ПІДРОЗДІЛОМ',
+                chat_id: chatId
+            });
             await handleUnitManagement(chatId, user.id, request);
-        else {
+        } else {
             //await handleBusinessManagement(callbackQuery);
         }
 
