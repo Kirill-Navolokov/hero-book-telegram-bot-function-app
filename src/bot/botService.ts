@@ -7,6 +7,7 @@ import { TelegramAccountsRepository } from "../repositories/telegramAccountsRepo
 import { mongoClient } from "../handler";
 import { strings } from "./strings";
 import { botCommands } from "./commands";
+import BotDeleteMessageResponse from "../models/botDeleteMessageResponse";
 
 const TOKEN = process.env.TELEGRAM_TOKEN!;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
@@ -92,6 +93,10 @@ export function sendMessage(responseMessage: BotTextResponse): Promise<fetch.Res
 
 export function sendPhoto(responseMessage: BotPhotoResponse): Promise<fetch.Response> {
     return sendToBot('sendPhoto', responseMessage);
+}
+
+export function deleteMessage(deleteMessage: BotDeleteMessageResponse): Promise<fetch.Response> {
+    return sendToBot('deleteMessage', deleteMessage);
 }
 
 function sendToBot(endpoint: string, response: BotResponse): Promise<fetch.Response> {

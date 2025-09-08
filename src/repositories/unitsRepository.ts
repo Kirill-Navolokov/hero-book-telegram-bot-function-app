@@ -12,16 +12,21 @@ export class UnitsRepository extends BaseRepository {
         return process.env.DB_UNITS_COLLECTION!;
     }
 
-    // public createUnitFromRequest(request: UnitRegistration): Promise<Unit> {
-    //     request.
-    //     let unit: Unit = {
-    //         _id: new ObjectId(),
-    //         isPublished: false,
-    //         name
-    //     }
+    public async createUnitFromRequest(request: UnitRegistration): Promise<Unit> {
+        let unit: Unit = {
+            _id: new ObjectId(),
+            isPublished: false,
+            name: request.name,
+            adminContact: {
+                tgUserId: request.userId!,
+                email: request.adminEmail
+            }
+        }
 
-    //     const collection = this.getCollection();
-    //     unit = await collection.insertOne(unit, {forceServerObjectId: true});
+        const collection = this.getCollection<Unit>();
+        const result = await collection.insertOne(unit, {forceServerObjectId: true});
+        unit._id = result.insertedId;
 
-    // }
+        return unit;
+    }
 }

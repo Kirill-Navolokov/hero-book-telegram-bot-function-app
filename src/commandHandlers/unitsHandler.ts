@@ -4,9 +4,10 @@ import { mongoClient } from "../handler";
 import { User } from "../models/user";
 import { strings } from "../bot/strings";
 import { botCommands } from "../bot/commands";
-import { sendMessage } from "../bot/botService";
+import { deleteMessage, sendMessage } from "../bot/botService";
 import { TelegramAccountsRepository } from "../repositories/telegramAccountsRepository";
 import { UnitRegistration } from "../models/unitRegistration";
+import { UnitsRepository } from "../repositories/unitsRepository";
 
 
 export async function handleUnitRegistration(
@@ -35,7 +36,6 @@ export async function handleUnitRegistration(
 
         await sendMessage({
             chat_id: (process.env.HERO_BOOK_ADMIN_GROUP as unknown) as number,
-            //text: strings.unitRegistrationRequest(registrationRequest, user.username!),
             text: JSON.stringify(unitRegistration, undefined, '\n'),
             reply_markup: {
                 inline_keyboard: [
@@ -60,6 +60,7 @@ export async function handleUnitRegistration(
 
 export async function handleUnitRegistrationResult(
     chatId: string,
+    requestMessageId: number,
     callbackData: string,
     request: string
 ): Promise<void> {
@@ -67,27 +68,37 @@ export async function handleUnitRegistrationResult(
         return key == "_id" ? new ObjectId(value as string) : value;
     }) as UnitRegistration;
     const db = mongoClient.db(process.env.DB_NAME);
-    const unitsRepo = new UnitRegistrationsRepository(db);
-    registration = await unitsRepo.get(registration._id!);
+    const unitRegistrationsRepo = new UnitRegistrationsRepository(db);
+    registration = await unitRegistrationsRepo.get(registration._id!);
     let message;
 
     //CHANGE STATUS
     if(callbackData.includes('approve')) {
-        await sendMessage({chat_id: chatId, text: 'APPROVED: ' + JSON.stringify(registration)});
+        // const unitsRepo = new UnitsRepository(db);
+        // await unitsRepo.createUnitFromRequest(registration);
+
+        //notify user
         message = 'Ваш підрозділ було зареєстровано. Тепер ви зможете його дозаповнити та опублікувати.';
-        //ADD UNIT ITEM INTO TABLE
-        //await unitsRepo.createUnitFromRequest(registration);
+        await unitRegistrationsRepo.delete(registration._id!);
+
+        //notify admins
+        await deleteMessage({chat_id: chatId, message_id: requestMessageId});
+        await sendMessage({chat_id: chatId, text: 'ДОДАНО\n' + JSON.stringify(registration, undefined, '\n')});
     }
     else if (callbackData.includes('reject')) {
-        await sendMessage({chat_id: chatId, text: 'REJECTED: ' + JSON.stringify(registration)});
+        await unitRegistrationsRepo.delete(registration._id!);
+        await deleteMessage({chat_id: chatId, message_id: requestMessageId});
+        await sendMessage({chat_id: chatId, text: 'ВІДХИЛЕНО\n' + JSON.stringify(registration, undefined, '\n')});
         message = 'Ваш запит на реєстрацію підрозділу було відхилено.';
     } else {
-        await sendMessage({chat_id: chatId, text: 'BANNED: ' + JSON.stringify(registration)});
+        await unitRegistrationsRepo.delete(registration._id!);
+        //await sendMessage({chat_id: chatId, text: 'BANNED: ' + JSON.stringify(registration)});
+        await deleteMessage({chat_id: chatId, message_id: requestMessageId});
         const tgAccountRepository = new TelegramAccountsRepository(db);
         await tgAccountRepository.add(registration.userId!);
     }
 
-    //await unitsRepo.delete(registration._id!);
+    // await unitRegistrationsRepo.delete(registration._id!);
 
     if(!callbackData.includes('ban')) {
         await sendMessage({

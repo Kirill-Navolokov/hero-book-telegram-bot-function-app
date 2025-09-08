@@ -66,7 +66,11 @@ async function handleCallbackQuery(callbackQuery: any): Promise<void> {
         });
     } else if(request.startsWith(botCommands.registration)) {
         if(request.includes('unit')){
-            await handleUnitRegistrationResult(chatId, request, callbackQuery.message.text);
+            await handleUnitRegistrationResult(
+                chatId,
+                callbackQuery.message.message_id,
+                request,
+                callbackQuery.message.text);
         } else {
             //handle business registration
         }
