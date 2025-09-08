@@ -29,4 +29,11 @@ export class UnitsRepository extends BaseRepository {
 
         return unit;
     }
+
+    public async getUnitByAdminTgId(userId: number): Promise<Unit | null> {
+        const collection = this.getCollection<Unit>();
+        const result = await collection.findOne({'adminContact.tgUserId': userId});
+
+        return result;
+    }
 }

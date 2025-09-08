@@ -9,25 +9,28 @@ import { strings } from "./strings";
 import { botCommands } from "./commands";
 import BotDeleteMessageResponse from "../models/botDeleteMessageResponse";
 import { UnitRegistrationsRepository } from "../repositories/unitRegistrationsRepository";
+import { UnitsRepository } from "../repositories/unitsRepository";
 
 const TOKEN = process.env.TELEGRAM_TOKEN!;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
 
 export async function greetUser(chatId: string, userId: number): Promise<fetch.Response> {
     const unitRegistrationsRepo = new UnitRegistrationsRepository(mongoClient.db(process.env.DB_NAME));
-    const unitRequestExists = await unitRegistrationsRepo.requestFromUserExists(userId);
+    const unitRequestUnderReview = await unitRegistrationsRepo.requestFromUserExists(userId);
+    let unitOrBusinessName: string|undefined;
+
+    if(!unitRequestUnderReview) {
+        const unitsRepo = new UnitsRepository(mongoClient.db(process.env.DB_NAME));
+        const unit = await unitsRepo.getUnitByAdminTgId(userId);
+        if(unit != null)
+            unitOrBusinessName = unit.name;
+    }
 
     let responseMessage: BotTextResponse = {
         chat_id: chatId,
-        text: strings.greetUnknownUser,
+        text: getGreetingMessage(unitRequestUnderReview, unitOrBusinessName),
         reply_markup: {
-            // inline_keyboard: [
-            //     [{text: strings.getRandomWod, callback_data: botCommands.randomWod}],
-            //     [{text: strings.reginsterVeteranBusiness, callback_data: botCommands.registerVeteranBusiness}],
-            //     [{text: strings.registerUnit, callback_data: botCommands.registerUnit}],
-            //     [{text: strings.needMoreFunctionality, callback_data: botCommands.needMoreFunctionality}],
-            // ]
-            inline_keyboard: getStartInlineKeyboard(unitRequestExists)
+            inline_keyboard: getStartInlineKeyboard(unitRequestUnderReview)
         }
     }
 
@@ -35,19 +38,28 @@ export async function greetUser(chatId: string, userId: number): Promise<fetch.R
 }
 
 function getStartInlineKeyboard(
-    unitRequestExists: boolean
+    unitRequestUnderReview: boolean
 ) : Array<Array<{text: string; callback_data: string}>> {
     const keyboardButtons = [
         [{text: strings.getRandomWod, callback_data: botCommands.randomWod}],
         [{text: strings.reginsterVeteranBusiness, callback_data: botCommands.registerVeteranBusiness}]
     ]
 
-    if(!unitRequestExists)
+    if(!unitRequestUnderReview)
         keyboardButtons.push([{text: strings.registerUnit, callback_data: botCommands.registerUnit}]);
 
     keyboardButtons.push([{text: strings.needMoreFunctionality, callback_data: botCommands.needMoreFunctionality}]);
 
     return keyboardButtons;
+}
+
+function getGreetingMessage(underReview: boolean, name?: string): string {
+    if(underReview)
+        return strings.greetUnderReviewUser;
+
+    return name == undefined
+        ? strings.greetUnknownUser 
+        : strings.greetKnownUser(name!);
 }
 
 export async function validateRequestUser(body: any): Promise<boolean> {

@@ -1,5 +1,9 @@
 export const strings = {
     greetUnknownUser: 'Схоже, ми ще не знайомі. Я - бот Книги Героїв, допомагаю тут по дрібницях. Чим можу вам допомогти?',
+    greetUnderReviewUser: 'Привіт! Ми вже трохи знайомі. Поки ваш запит на розгялді, маю настпуний функціонал.',
+    greetKnownUser: (name: string) => {
+        return `Привіт, ${name}! Що будемо робити?`;
+    },
     getRandomWod: 'Дай рандомний воркаут',
     registerUnit: 'Я адмін, хочу додати підрозділ',
     reginsterVeteranBusiness: 'Я ветеран, хочу додати свій бізнес',
