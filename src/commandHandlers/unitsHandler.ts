@@ -70,42 +70,37 @@ export async function handleUnitRegistrationResult(
     const db = mongoClient.db(process.env.DB_NAME);
     const unitRegistrationsRepo = new UnitRegistrationsRepository(db);
     registration = await unitRegistrationsRepo.get(registration._id!);
-    let message;
+    let userMessage;
+    let adminMessage;
 
-    //CHANGE STATUS
     if(callbackData.includes('approve')) {
-        // const unitsRepo = new UnitsRepository(db);
-        // await unitsRepo.createUnitFromRequest(registration);
+        const unitsRepo = new UnitsRepository(db);
+        const newUnit = await unitsRepo.createUnitFromRequest(registration);
 
-        //notify user
-        message = 'Ваш підрозділ було зареєстровано. Тепер ви зможете його дозаповнити та опублікувати.';
-        await unitRegistrationsRepo.delete(registration._id!);
-
-        //notify admins
-        await deleteMessage({chat_id: chatId, message_id: requestMessageId});
-        await sendMessage({chat_id: chatId, text: 'ДОДАНО\n' + JSON.stringify(registration, undefined, '\n')});
+        userMessage = 'Ваш підрозділ було зареєстровано. Тепер ви зможете його дозаповнити та опублікувати.';
+        adminMessage = `Підрозділ ${newUnit.name} створено`;
     }
     else if (callbackData.includes('reject')) {
-        await unitRegistrationsRepo.delete(registration._id!);
-        await deleteMessage({chat_id: chatId, message_id: requestMessageId});
-        await sendMessage({chat_id: chatId, text: 'ВІДХИЛЕНО\n' + JSON.stringify(registration, undefined, '\n')});
-        message = 'Ваш запит на реєстрацію підрозділу було відхилено.';
+        userMessage = 'Ваш запит на реєстрацію підрозділу було відхилено.';
+        adminMessage = `Запит на підрозділ ${registration.name} віхилено`;
     } else {
-        await unitRegistrationsRepo.delete(registration._id!);
-        //await sendMessage({chat_id: chatId, text: 'BANNED: ' + JSON.stringify(registration)});
-        await deleteMessage({chat_id: chatId, message_id: requestMessageId});
         const tgAccountRepository = new TelegramAccountsRepository(db);
         await tgAccountRepository.add(registration.userId!);
+
+        adminMessage = `Юзера ${registration.userId} з підрозділом ${registration.name} було забанено`;
     }
 
-    // await unitRegistrationsRepo.delete(registration._id!);
+    await unitRegistrationsRepo.delete(registration._id!);
+    await deleteMessage({chat_id: chatId, message_id: requestMessageId});
 
     if(!callbackData.includes('ban')) {
         await sendMessage({
             chat_id: registration.chatId!,
-            text: message!
+            text: userMessage!
         });
     }
+
+    await sendMessage({chat_id: chatId, text: adminMessage});
 }
 
 async function verifyUnitRegistrationRequest(
