@@ -30,7 +30,7 @@ export async function greetUser(chatId: string, userId: number): Promise<fetch.R
         chat_id: chatId,
         text: getGreetingMessage(unitRequestUnderReview, unitOrBusinessName),
         reply_markup: {
-            inline_keyboard: getStartInlineKeyboard(unitRequestUnderReview)
+            inline_keyboard: getStartInlineKeyboard(unitRequestUnderReview, unitOrBusinessName != undefined)
         }
     }
 
@@ -38,7 +38,8 @@ export async function greetUser(chatId: string, userId: number): Promise<fetch.R
 }
 
 function getStartInlineKeyboard(
-    unitRequestUnderReview: boolean
+    unitRequestUnderReview: boolean,
+    unitAdmin: boolean
 ) : Array<Array<{text: string; callback_data: string}>> {
     const keyboardButtons = [
         [{text: strings.getRandomWod, callback_data: botCommands.randomWod}],
@@ -48,7 +49,23 @@ function getStartInlineKeyboard(
     if(!unitRequestUnderReview)
         keyboardButtons.push([{text: strings.registerUnit, callback_data: botCommands.registerUnit}]);
 
+    if(unitAdmin) {
+        keyboardButtons.push([{
+            text: strings.unitManagement,
+            callback_data: botCommands.managementQuery('unit')}]);
+    }
+
     keyboardButtons.push([{text: strings.needMoreFunctionality, callback_data: botCommands.needMoreFunctionality}]);
+
+    return keyboardButtons;
+}
+
+function getUnitAdminInlineKeyboard(isPublished: boolean) : Array<Array<{text: string; callback_data: string}>> {
+    const keyboardButtons = [
+        [{text: 'Змінити фото', callback_data: ''}, {text: 'Змінити інформацію', callback_data: ''}],
+        [{text: '', callback_data: ''}]
+    ];
+
 
     return keyboardButtons;
 }

@@ -4,9 +4,8 @@ import { greetUser, sendMessage, validateRequestUser } from "./bot/botService";
 import { botCommands } from "./bot/commands";
 import { strings } from "./bot/strings";
 import { User } from "./models/user";
-import { handleUnitRegistration, handleUnitRegistrationResult } from "./commandHandlers/unitsHandler";
+import { handleUnitManagement, handleUnitRegistration, handleUnitRegistrationResult } from "./commandHandlers/unitsHandler";
 import { sendRandomWod } from "./commandHandlers/wodsHandler";
-import { UnitRegistration } from "./models/unitRegistration";
 
 export const mongoClient = new MongoClient(process.env.MONGO_CONNECTION_STRING!);
 
@@ -48,6 +47,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 async function handleCallbackQuery(callbackQuery: any): Promise<void> {
     const request:string = callbackQuery.data;
     const chatId = callbackQuery.message.chat.id;
+    const user = callbackQuery.message.from as User;
 
     if(request == botCommands.randomWod) {
         await sendRandomWod(chatId);
@@ -74,7 +74,12 @@ async function handleCallbackQuery(callbackQuery: any): Promise<void> {
         } else {
             //handle business registration
         }
-    } else if(request.startsWith(botCommands.ban)) {
+    } else if(request.startsWith(botCommands.management)) {
+        if(request.includes('unit'))
+            await handleUnitManagement(chatId, user.id, request);
+        else {
+            //await handleBusinessManagement(callbackQuery);
+        }
 
     } else {
         await sendMessage({chat_id: chatId, text: strings.unknownRequest(request)});

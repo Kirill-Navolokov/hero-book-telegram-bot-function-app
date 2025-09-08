@@ -4,10 +4,12 @@ export const strings = {
     greetKnownUser: (name: string) => {
         return `Привіт, ${name}! Що будемо робити?`;
     },
+    availableCommands: 'Доступні команди',
     getRandomWod: 'Дай рандомний воркаут',
     registerUnit: 'Я адмін, хочу додати підрозділ',
     reginsterVeteranBusiness: 'Я ветеран, хочу додати свій бізнес',
     needMoreFunctionality: 'Чому так мало функціоналу?',
+    unitManagement: 'Керування підрозділом',
     unitRegistration: 'РЕЄСТРАЦІЯ ПІДРОЗДІЛУ',
     businessRegistration: 'РЕЄСТРАЦІЯ БІЗНЕСУ',
     unitRegistrationExplanation: `РЕЄСТРАЦІЯ ПІДРОЗДІЛУ\n

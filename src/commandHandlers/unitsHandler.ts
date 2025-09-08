@@ -39,9 +39,9 @@ export async function handleUnitRegistration(
             text: JSON.stringify(unitRegistration, undefined, '\n'),
             reply_markup: {
                 inline_keyboard: [
-                    [{text: strings.approve + ' ПІДРОЗДІЛ', callback_data: botCommands.approveQuery(registrationId, 'unit') }],
-                    [{text: strings.reject + ' ПІДРОЗДІЛ', callback_data: botCommands.rejectQuery(registrationId, 'unit')}],
-                    [{text: strings.ban, callback_data: botCommands.banQuery(registrationId, 'unit')}]
+                    [{text: strings.approve + ' ПІДРОЗДІЛ', callback_data: botCommands.approveQuery('unit') }],
+                    [{text: strings.reject + ' ПІДРОЗДІЛ', callback_data: botCommands.rejectQuery('unit')}],
+                    [{text: strings.ban, callback_data: botCommands.banQuery('unit')}]
                 ]
             }
         });
@@ -103,6 +103,23 @@ export async function handleUnitRegistrationResult(
     await sendMessage({chat_id: chatId, text: adminMessage});
 }
 
+export async function handleUnitManagement(
+    chatId: any,
+    userId: number,
+    request: string): Promise<void> {
+
+    if(request == '/management/unit') {
+        await sendMessage({
+            chat_id: chatId,
+            text: strings.availableCommands,
+            reply_markup: {
+                inline_keyboard: getAdminManagementKeyboard(userId)
+            }
+        });
+        return;
+    }
+}
+
 async function verifyUnitRegistrationRequest(
     registrationRequest: string,
     chatId: number
@@ -118,4 +135,72 @@ async function verifyUnitRegistrationRequest(
         });
         return null;
     }
+}
+
+async function getAdminManagementKeyboard(
+    adminUserId: number
+): Promise<Array<Array<{text: string, callback_data: string}>>> {
+    const unitsRepo = new UnitsRepository(mongoClient.db(process.env.DB_NAME));
+    const unit = await unitsRepo.getUnitByAdminTgId(adminUserId);
+    const isUnit = unit!.type == 0;
+    const unitIdString = unit!._id.toString();
+    const keyboard = [
+        [{
+            text: 'ЗМІНИТИ ФОТО',
+            callback_data: botCommands.managementQuery('unit', unitIdString, botCommands.setPhoto)}
+        ],
+        [{
+            text: 'ЗМІНИТИ НАЗВУ',
+            callback_data: botCommands.managementQuery('unit', unitIdString, botCommands.setName)}
+        ],
+        [{
+            text: 'ЗМІНИТИ ОПИС',
+            callback_data: botCommands.managementQuery('unit', unitIdString, botCommands.setDescription)}
+        ],
+        [{
+            text: 'ВСТАНОВИТИ ДАТУ ЗАСНУВАННЯ',
+            callback_data: botCommands.managementQuery('unit', unitIdString, botCommands.setUnitFoundationDate)
+        }],
+        unit!.type == undefined
+            ? [{
+                    text: 'СТАТИ МІЛІТАРІ СПІЛЬНОТОЮ',
+                    callback_data: botCommands.managementQuery('unit', unitIdString, botCommands.setUnitType(1))
+                },
+                {
+                    text: 'СТАТИ ПІДРОЗДІЛОМ',
+                    callback_data: botCommands.managementQuery('unit', unitIdString, botCommands.setUnitType(0))
+                }]
+            : [{
+                    text: isUnit ? 'СТАТИ МІЛІТАРІ СПІЛЬНОТОЮ' : 'СТАТИ ПІДРОЗДІЛОМ',
+                    callback_data: isUnit
+                        ? botCommands.managementQuery('unit', unitIdString, botCommands.setUnitType(1))
+                        : botCommands.managementQuery('unit', unitIdString, botCommands.setUnitType(0))
+                }],
+        [{
+            text: unit!.isPublished ? 'ОПУБЛІКУВАТИ ПІДРОЗДІЛ': 'ПРИХОВАТИ ПІДРОЗДІЛ',
+            callback_data: unit!.isPublished
+                ? botCommands.managementQuery('unit', unitIdString, botCommands.unpublish)
+                : botCommands.managementQuery('unit', unitIdString, botCommands.publish)
+        }],
+        [{
+            text: 'ВИДАЛИТИ ПІДРОЗДІЛ',
+            callback_data: botCommands.managementQuery('unit', unitIdString, botCommands.delete)
+        }]
+    ];
+
+    // keyboard.push([{
+    //     text: isUnit ? 'СТАТИ СПІЛЬНОТОЮ' : 'СТАТИ ПІДРОЗДІЛОМ',
+    //     callback_data: isUnit
+    //         ? botCommands.managementQuery('unit', unitIdString, botCommands.setUnitType(1))
+    //         : botCommands.managementQuery('unit', unitIdString, botCommands.setUnitType(0))
+    // }])
+
+    // keyboard.push([{
+    //     text: unit!.isPublished ? 'ВІДКРИТИ ПІДРОЗДІЛ': 'ЗАКРИТИ ПІДРОЗДІЛ',
+    //     callback_data: unit!.isPublished
+    //         ? botCommands.managementQuery('unit', unitIdString, botCommands.unpublish)
+    //         : botCommands.managementQuery('unit', unitIdString, botCommands.publish)
+    // }]);
+
+    return keyboard;
 }
