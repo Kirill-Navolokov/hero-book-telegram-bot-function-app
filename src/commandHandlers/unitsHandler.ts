@@ -188,7 +188,7 @@ export async function handleUnitUpdateInput(
 
     const requestSegments = (message.reply_to_message.text as string).split('/');
     const updateText = message.text as string;
-    const action = requestSegments.pop()!;
+    const action = '/' + requestSegments.pop()!;
     switch(action) {
         case botCommands.setName:
             if(updateText.length == 0 || updateText.length > 20)
