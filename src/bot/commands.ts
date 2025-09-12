@@ -11,6 +11,7 @@ export const botCommands = {
     publish: '/publish',
     unpublish: '/unpublish',
     setPhoto: '/setPhoto',
+    setType: '/setType',
     setUnitType: (type: number) => `/setType/${type}`,
     setUnitFoundationDate: '/setDate',
     delete: '/delete',

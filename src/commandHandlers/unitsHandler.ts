@@ -8,6 +8,7 @@ import { deleteMessage, sendMessage } from "../bot/botService";
 import { TelegramAccountsRepository } from "../repositories/telegramAccountsRepository";
 import { UnitRegistration } from "../models/unitRegistration";
 import { UnitsRepository } from "../repositories/unitsRepository";
+import { Unit } from "../models/unit";
 
 
 export async function handleUnitRegistration(
@@ -106,21 +107,85 @@ export async function handleUnitRegistrationResult(
 export async function handleUnitManagement(
     chatId: any,
     userId: number,
-    request: string): Promise<void> {
+    request: string
+): Promise<void> {
+    const unitsRepo = new UnitsRepository(mongoClient.db(process.env.DB_NAME));
+    const unit = await unitsRepo.getUnitByAdminTgId(userId);
+
+    if(unit == null) {
+        await sendMessage({
+            chat_id: chatId,
+            text: strings.unitNotReachable,
+        });
+        return;
+    }
 
     if(request == '/management/unit') {
-        // await sendMessage({
-        //         text:'КЕРУВАННЯ ПІДРОЗДІЛОМ',
-        //         chat_id: chatId
-        //     });
         await sendMessage({
             chat_id: chatId,
             text: strings.availableCommands,
             reply_markup: {
-                inline_keyboard: await getAdminManagementKeyboard(userId)
+                inline_keyboard: await getAdminManagementKeyboard(unit)
             }
         });
+        return;
+    } else if(request.includes(botCommands.setPhoto)) {
+        await sendMessage({
+            chat_id: chatId,
+            text: botCommands.managementQuery('unit', unit._id.toString(), botCommands.setPhoto),
+            reply_markup: {
+                force_reply: true,
+                input_field_placeholder: strings.setPhoto
+            }
+        });
+       return; 
+    } else if(request.includes(botCommands.setName)) {
+        await sendMessage({
+            chat_id: chatId,
+            text: botCommands.managementQuery('unit', unit._id.toString(), botCommands.setName),
+            reply_markup: {
+                force_reply: true,
+                input_field_placeholder: strings.setName
+            }
+        });
+        return;
+    } else if(request.includes(botCommands.setDescription)) {
+        await sendMessage({
+            chat_id: chatId,
+            text: botCommands.managementQuery('unit', unit._id.toString(), botCommands.setDescription),
+            reply_markup: {
+                force_reply: true,
+                input_field_placeholder: strings.setDescription
+            }
+        });
+        return;
+    } else if(request.includes(botCommands.setUnitFoundationDate)) {
+        await sendMessage({
+            chat_id: chatId,
+            text: botCommands.managementQuery('unit', unit._id.toString(), botCommands.setUnitFoundationDate),
+            reply_markup: {
+                force_reply: true,
+                input_field_placeholder: strings.setFoundationDate
+            }
+        });
+        return;
+    } else if(request.includes(botCommands.setType)) {
+        const segmets = request.split('/');
+        
+        //await unitsRepo.setUnitType(unit._id, Number.parseInt(segmets.pop()!));
+        await sendMessage({text: `ВСТАНОВЛЕНИЙ ТИП: ${Number.parseInt(segmets.pop()!)}`, chat_id: chatId});
+    } else if(request.includes(botCommands.publish)) {
+        //await unitsRepo.toggleUnitVisibility(unit._id, true);
+        await sendMessage({text: 'ОПУБЛІКОВАНО', chat_id: chatId});
+    } else if(request.includes(botCommands.unpublish)) {
+        //await unitsRepo.toggleUnitVisibility(unit._id, false);
+        await sendMessage({text: 'ПРИХОВАНО', chat_id: chatId});
     }
+
+    await sendMessage({
+        text: 'ЗМІНИ ЗАСТОСОВАНО',
+        chat_id: chatId
+    });
 }
 
 async function verifyUnitRegistrationRequest(
@@ -141,10 +206,8 @@ async function verifyUnitRegistrationRequest(
 }
 
 async function getAdminManagementKeyboard(
-    adminUserId: number
+    unit: Unit
 ): Promise<Array<Array<{text: string, callback_data: string}>>> {
-    const unitsRepo = new UnitsRepository(mongoClient.db(process.env.DB_NAME));
-    const unit = await unitsRepo.getUnitByAdminTgId(adminUserId);
     const isUnit = unit!.type == 0;
     const unitIdString = unit!._id.toString();
     const keyboard = [
@@ -180,30 +243,16 @@ async function getAdminManagementKeyboard(
                         : botCommands.managementQuery('unit', unitIdString, botCommands.setUnitType(0))
                 }],
         [{
-            text: unit!.isPublished ? 'ОПУБЛІКУВАТИ ПІДРОЗДІЛ': 'ПРИХОВАТИ ПІДРОЗДІЛ',
+            text: unit!.isPublished ? 'ПРИХОВАТИ ПІДРОЗДІЛ' : 'ОПУБЛІКУВАТИ ПІДРОЗДІЛ',
             callback_data: unit!.isPublished
                 ? botCommands.managementQuery('unit', unitIdString, botCommands.unpublish)
                 : botCommands.managementQuery('unit', unitIdString, botCommands.publish)
         }],
-        [{
-            text: 'ВИДАЛИТИ ПІДРОЗДІЛ',
-            callback_data: botCommands.managementQuery('unit', unitIdString, botCommands.delete)
-        }]
+        // [{
+        //     text: 'ВИДАЛИТИ ПІДРОЗДІЛ',
+        //     callback_data: botCommands.managementQuery('unit', unitIdString, botCommands.delete)
+        // }]
     ];
-
-    // keyboard.push([{
-    //     text: isUnit ? 'СТАТИ СПІЛЬНОТОЮ' : 'СТАТИ ПІДРОЗДІЛОМ',
-    //     callback_data: isUnit
-    //         ? botCommands.managementQuery('unit', unitIdString, botCommands.setUnitType(1))
-    //         : botCommands.managementQuery('unit', unitIdString, botCommands.setUnitType(0))
-    // }])
-
-    // keyboard.push([{
-    //     text: unit!.isPublished ? 'ВІДКРИТИ ПІДРОЗДІЛ': 'ЗАКРИТИ ПІДРОЗДІЛ',
-    //     callback_data: unit!.isPublished
-    //         ? botCommands.managementQuery('unit', unitIdString, botCommands.unpublish)
-    //         : botCommands.managementQuery('unit', unitIdString, botCommands.publish)
-    // }]);
 
     return keyboard;
 }

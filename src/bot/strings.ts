@@ -1,17 +1,19 @@
 export const strings = {
     greetUnknownUser: 'Схоже, ми ще не знайомі. Я - бот Книги Героїв, допомагаю тут по дрібницях. Чим можу вам допомогти?',
     greetUnderReviewUser: 'Привіт! Ми вже трохи знайомі. Поки ваш запит на розгялді, маю настпуний функціонал.',
-    greetKnownUser: (name: string) => {
-        return `Привіт, ${name}! Що будемо робити?`;
-    },
     availableCommands: 'Доступні команди',
     getRandomWod: 'Дай рандомний воркаут',
     registerUnit: 'Я адмін, хочу додати підрозділ',
     reginsterVeteranBusiness: 'Я ветеран, хочу додати свій бізнес',
     needMoreFunctionality: 'Чому так мало функціоналу?',
     unitManagement: 'Керування підрозділом',
+    unitNotReachable: 'Підрозділ більше не доступний. Введіть /start щоб подивитись доступний функціонал.',
     unitRegistration: 'РЕЄСТРАЦІЯ ПІДРОЗДІЛУ',
     businessRegistration: 'РЕЄСТРАЦІЯ БІЗНЕСУ',
+    setPhoto: 'Оберіть і відправте лого',
+    setName: 'Введіть назву',
+    setDescription: 'Введіть опис',
+    setFoundationDate: 'Введіть дату у форматі YYYY-MM-DD (пр. 2025-04-17)',
     unitRegistrationExplanation: `РЕЄСТРАЦІЯ ПІДРОЗДІЛУ\n
 Відповіддю на це повідомлення ви зробите запит на рееєстрацію підрозділу.
 Назву потім можна буде змінити. Інстаграм та телеграм канал (не обовʼязковий) для верифікації
@@ -37,6 +39,9 @@ export const strings = {
     unitApproved: 'Ваш підрозділ було зареєстровано. Тепер ви зможете його дозаповнити та опублікувати.',
     unitRejected: 'Ваш запит на реєстрацію підрозділу було відхилено.',
 
+    greetKnownUser: (name: string) => {
+        return `Привіт, ${name}! Що будемо робити?`;
+    },
     unitRegistrationRequest: (requestInfo: string, contact: string) => {
         return `ЗАПИТ НА ПІДРОЗДІЛ:\n\nКОНТАКТ:${contact}\n\n${requestInfo}`;
     },

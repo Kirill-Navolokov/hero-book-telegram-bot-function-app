@@ -1,4 +1,4 @@
-import { Db, ObjectId } from "mongodb"
+import { Db, ObjectId, UpdateFilter } from "mongodb"
 import { BaseRepository } from "./baseRepository"
 import { UnitRegistration } from "../models/unitRegistration";
 import { Unit } from "../models/unit";
@@ -35,5 +35,26 @@ export class UnitsRepository extends BaseRepository {
         const result = await collection.findOne({'adminContact.tgUserId': userId});
 
         return result;
+    }
+
+    public async toggleUnitVisibility(id: ObjectId, isPublished: boolean): Promise<void> {
+        const updateQuery = {
+            $set: {isPublished: isPublished}
+        };
+
+        return this.updateUnit(id, updateQuery);
+    }
+
+    public async setUnitType(id: ObjectId, type: number): Promise<void> {
+        const updateQuery = {
+            $set: {type: type}
+        };
+
+        return this.updateUnit(id, updateQuery);
+    }
+
+    private async updateUnit(id: ObjectId, updateQuery: UpdateFilter<Unit>): Promise<void> {
+        const collection = this.getCollection<Unit>();
+        await collection.findOneAndUpdate(id, updateQuery);
     }
 }
