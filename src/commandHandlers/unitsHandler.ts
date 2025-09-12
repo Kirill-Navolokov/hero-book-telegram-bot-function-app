@@ -216,6 +216,7 @@ export async function handleUnitUpdateInput(
             break;
         case botCommands.setPhoto:
             const photos = (message.photo as Array<any>);
+            await sendMessage({chat_id: chatId, text: JSON.stringify(message)});
             if(photos.length == 0 || photos.length > 1)
                 await sendMessage({chat_id: chatId, text: 'МОЖНА ЗАВАНТАЖИТИ ТІЛЬКИ ОДНЕ ФОТО ДЛЯ ЛОГО'});
             else
