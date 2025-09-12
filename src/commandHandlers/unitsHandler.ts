@@ -240,8 +240,7 @@ async function verifyUnitExists(
     unitsRepo: UnitsRepository
 ): Promise<Unit | null> {
     const unit = await unitsRepo.getUnitByAdminTgId(adminTgId);
-
-    if(unit != null)
+    if(unit == null)
         await sendMessage({chat_id: chatId, text: strings.unitNotReachable});
     
     return unit;
