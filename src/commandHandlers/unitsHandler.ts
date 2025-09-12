@@ -175,11 +175,11 @@ export async function handleUnitManagement(
         //await unitsRepo.setUnitType(unit._id, Number.parseInt(segmets.pop()!));
         await sendMessage({text: `ВСТАНОВЛЕНИЙ ТИП: ${Number.parseInt(segmets.pop()!)}`, chat_id: chatId});
     } else if(request.includes(botCommands.publish)) {
-        //await unitsRepo.toggleUnitVisibility(unit._id, true);
-        await sendMessage({text: 'ОПУБЛІКОВАНО', chat_id: chatId});
+        await unitsRepo.toggleUnitVisibility(unit._id, true);
+        //await sendMessage({text: 'ОПУБЛІКОВАНО', chat_id: chatId});
     } else if(request.includes(botCommands.unpublish)) {
-        //await unitsRepo.toggleUnitVisibility(unit._id, false);
-        await sendMessage({text: 'ПРИХОВАНО', chat_id: chatId});
+        await unitsRepo.toggleUnitVisibility(unit._id, false);
+        //await sendMessage({text: 'ПРИХОВАНО', chat_id: chatId});
     }
 
     await sendMessage({
