@@ -55,6 +55,6 @@ export class UnitsRepository extends BaseRepository {
 
     private async updateUnit(id: ObjectId, updateQuery: UpdateFilter<Unit>): Promise<void> {
         const collection = this.getCollection<Unit>();
-        await collection.findOneAndUpdate(id, updateQuery);
+        await collection.findOneAndUpdate({_id: id}, updateQuery);
     }
 }
