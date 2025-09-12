@@ -53,6 +53,30 @@ export class UnitsRepository extends BaseRepository {
         return this.updateUnit(id, updateQuery);
     }
 
+    public async setUnitName(id: ObjectId, name: string): Promise<void> {
+        const updateQuery = {
+            $set: {name: name}
+        };
+
+        return this.updateUnit(id, updateQuery);
+    }
+
+    public async setUnitDescription(id: ObjectId, description: string): Promise<void> {
+        const updateQuery = {
+            $set: {description: description}
+        };
+
+        return this.updateUnit(id, updateQuery);
+    }
+
+    public async setUnitFoundationDate(id: ObjectId, foundationDate: Date): Promise<void> {
+        const updateQuery = {
+            $set: {foundationDate: foundationDate}
+        };
+
+        return this.updateUnit(id, updateQuery);
+    }
+
     private async updateUnit(id: ObjectId, updateQuery: UpdateFilter<Unit>): Promise<void> {
         const collection = this.getCollection<Unit>();
         await collection.findOneAndUpdate({_id: id}, updateQuery);

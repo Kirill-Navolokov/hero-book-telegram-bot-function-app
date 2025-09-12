@@ -9,6 +9,7 @@ import { TelegramAccountsRepository } from "../repositories/telegramAccountsRepo
 import { UnitRegistration } from "../models/unitRegistration";
 import { UnitsRepository } from "../repositories/unitsRepository";
 import { Unit } from "../models/unit";
+import { send } from "process";
 
 
 export async function handleUnitRegistration(
@@ -110,15 +111,9 @@ export async function handleUnitManagement(
     request: string
 ): Promise<void> {
     const unitsRepo = new UnitsRepository(mongoClient.db(process.env.DB_NAME));
-    const unit = await unitsRepo.getUnitByAdminTgId(userId);
-
-    if(unit == null) {
-        await sendMessage({
-            chat_id: chatId,
-            text: strings.unitNotReachable,
-        });
+    const unit = await verifyUnitExists(chatId, userId, unitsRepo);
+    if(unit == null)
         return;
-    }
 
     if(request == '/management/unit') {
         await sendMessage({
@@ -178,10 +173,48 @@ export async function handleUnitManagement(
         await unitsRepo.toggleUnitVisibility(unit._id, false);
     }
 
-    await sendMessage({
-        text: 'ЗМІНИ ЗАСТОСОВАНО',
-        chat_id: chatId
-    });
+    await sendMessage({chat_id: chatId, text: strings.changesApplied});
+}
+
+export async function handleUnitUpdateInput(
+    chatId: any,
+    user: User,
+    message: any
+): Promise<void> {
+    const unitsRepo = new UnitsRepository(mongoClient.db(process.env.DB_NAME));
+    const unit = await verifyUnitExists(chatId, user.id, unitsRepo);
+    if(unit == null)
+        return;
+
+    const requestSegments = (message.reply_to_message.text as string).split('/');
+    const updateText = message.text as string;
+    const action = requestSegments.pop()!;
+    switch(action) {
+        case botCommands.setName:
+            if(updateText.length == 0 || updateText.length > 20)
+                await sendMessage({chat_id: chatId, text: strings.nameValidation});
+            else
+                await unitsRepo.setUnitName(unit._id, updateText);
+            break;
+        case botCommands.setDescription:
+            if(updateText.length == 0 || updateText.length > 1000)
+                await sendMessage({chat_id: chatId, text: strings.descriptionValidation});
+            else
+                await unitsRepo.setUnitDescription(unit._id, updateText);
+            break;
+        case botCommands.setUnitFoundationDate:
+            try {
+                await unitsRepo.setUnitFoundationDate(unit._id, new Date(updateText));
+            } catch(error) {
+                await sendMessage({chat_id: chatId, text: strings.foundationDateValidation});
+            }
+            break;
+        case botCommands.setPhoto:
+            break;
+        default:
+            await sendMessage({chat_id: chatId, text: strings.unknownRequest(action)})
+            break;
+    }
 }
 
 async function verifyUnitRegistrationRequest(
@@ -199,6 +232,19 @@ async function verifyUnitRegistrationRequest(
         });
         return null;
     }
+}
+
+async function verifyUnitExists(
+    chatId: any,
+    adminTgId: number,
+    unitsRepo: UnitsRepository
+): Promise<Unit | null> {
+    const unit = await unitsRepo.getUnitByAdminTgId(adminTgId);
+
+    if(unit != null)
+        await sendMessage({chat_id: chatId, text: strings.unitNotReachable});
+    
+    return unit;
 }
 
 async function getAdminManagementKeyboard(

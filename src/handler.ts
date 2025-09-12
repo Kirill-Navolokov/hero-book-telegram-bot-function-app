@@ -4,7 +4,7 @@ import { greetUser, sendMessage, validateRequestUser } from "./bot/botService";
 import { botCommands } from "./bot/commands";
 import { strings } from "./bot/strings";
 import { User } from "./models/user";
-import { handleUnitManagement, handleUnitRegistration, handleUnitRegistrationResult } from "./commandHandlers/unitsHandler";
+import { handleUnitManagement, handleUnitRegistration, handleUnitRegistrationResult, handleUnitUpdateInput } from "./commandHandlers/unitsHandler";
 import { sendRandomWod } from "./commandHandlers/wodsHandler";
 
 export const mongoClient = new MongoClient(process.env.MONGO_CONNECTION_STRING!);
@@ -95,7 +95,11 @@ async function handleReplyMessage(message: any): Promise<void> {
         await handleUnitRegistration(user, chatId, message.text);
     } else if (text.startsWith(strings.businessRegistration)) {
         //await handleBusinessRegistration(user, chatId, text);
+    } else if (text.startsWith(botCommands.management)) {
+        if(text.includes('unit')) {
+            await handleUnitUpdateInput(chatId, user, message);
+        }
     } else {
-
+        await sendMessage({chat_id: chatId, text: strings.unknownRequest(text)});
     }
 }
