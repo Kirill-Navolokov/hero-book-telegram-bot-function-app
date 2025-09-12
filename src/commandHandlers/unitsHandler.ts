@@ -193,22 +193,26 @@ export async function handleUnitUpdateInput(
         case botCommands.setName:
             if(updateText.length == 0 || updateText.length > 20)
                 await sendMessage({chat_id: chatId, text: strings.nameValidation});
-            else
+            else {
                 await unitsRepo.setUnitName(unit._id, updateText);
+                await sendMessage({chat_id: chatId, text: strings.changesApplied});
+            }
             break;
         case botCommands.setDescription:
             if(updateText.length == 0 || updateText.length > 1000)
                 await sendMessage({chat_id: chatId, text: strings.descriptionValidation});
-            else
+            else {
                 await unitsRepo.setUnitDescription(unit._id, updateText);
+                await sendMessage({chat_id: chatId, text: strings.changesApplied});
+            }
             break;
         case botCommands.setUnitFoundationDate:
-            try {
-                const date = new Date(updateText);
-                await unitsRepo.setUnitFoundationDate(unit._id, date);
-            } catch(error) {
+            const regex = /^\d{4}-\d{2}-\d{2}$/;
+            if(regex.test(updateText)) {
+                await unitsRepo.setUnitFoundationDate(unit._id, new Date(updateText));
+                await sendMessage({chat_id: chatId, text: strings.changesApplied});
+            } else
                 await sendMessage({chat_id: chatId, text: strings.foundationDateValidation});
-            }
             break;
         case botCommands.setPhoto:
             break;
