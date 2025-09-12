@@ -204,7 +204,8 @@ export async function handleUnitUpdateInput(
             break;
         case botCommands.setUnitFoundationDate:
             try {
-                await unitsRepo.setUnitFoundationDate(unit._id, new Date(updateText));
+                const date = new Date(updateText);
+                await unitsRepo.setUnitFoundationDate(unit._id, date);
             } catch(error) {
                 await sendMessage({chat_id: chatId, text: strings.foundationDateValidation});
             }
