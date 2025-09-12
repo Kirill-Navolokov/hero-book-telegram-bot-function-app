@@ -60,16 +60,6 @@ function getStartInlineKeyboard(
     return keyboardButtons;
 }
 
-function getUnitAdminInlineKeyboard(isPublished: boolean) : Array<Array<{text: string; callback_data: string}>> {
-    const keyboardButtons = [
-        [{text: 'Змінити фото', callback_data: ''}, {text: 'Змінити інформацію', callback_data: ''}],
-        [{text: '', callback_data: ''}]
-    ];
-
-
-    return keyboardButtons;
-}
-
 function getGreetingMessage(underReview: boolean, name?: string): string {
     if(underReview)
         return strings.greetUnderReviewUser;
