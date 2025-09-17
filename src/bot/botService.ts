@@ -10,6 +10,7 @@ import { botCommands } from "./commands";
 import BotDeleteMessageResponse from "../models/botDeleteMessageResponse";
 import { UnitRegistrationsRepository } from "../repositories/unitRegistrationsRepository";
 import { UnitsRepository } from "../repositories/unitsRepository";
+import { FileInfoRequest } from "../models/fileIntoRequest";
 
 const TOKEN = process.env.TELEGRAM_TOKEN!;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
@@ -139,7 +140,11 @@ export function deleteMessage(deleteMessage: BotDeleteMessageResponse): Promise<
     return sendToBot('deleteMessage', deleteMessage);
 }
 
-function sendToBot(endpoint: string, response: BotResponse): Promise<fetch.Response> {
+export function getFile(fileInfoRequest: FileInfoRequest): Promise<fetch.Response> {
+    return sendToBot('file', fileInfoRequest);
+}
+
+function sendToBot(endpoint: string, response: any): Promise<fetch.Response> {
     return fetch(`${TELEGRAM_API}/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

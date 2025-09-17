@@ -20,7 +20,7 @@ export const botCommands = {
     managementQuery: (entType: string, entId?: string, action?: string) =>
         entId == undefined
             ? `/management/${entType}`
-            : `/management/${entType}/${entId}${action}`,
+            : `/management/${entType}/${entId}/${action}`,
     approveQuery: (entType: string) => `/registration/approve/${entType}`,
     rejectQuery: (entType: string) => `/registration/reject/${entType}`,
     banQuery: (entType: string) => `/registration/ban/${entType}`

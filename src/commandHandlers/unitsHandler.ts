@@ -4,12 +4,13 @@ import { mongoClient } from "../handler";
 import { User } from "../models/user";
 import { strings } from "../bot/strings";
 import { botCommands } from "../bot/commands";
-import { deleteMessage, sendMessage } from "../bot/botService";
+import { deleteMessage, getFile, sendMessage } from "../bot/botService";
 import { TelegramAccountsRepository } from "../repositories/telegramAccountsRepository";
 import { UnitRegistration } from "../models/unitRegistration";
 import { UnitsRepository } from "../repositories/unitsRepository";
 import { Unit } from "../models/unit";
 import { send } from "process";
+import { json } from "stream/consumers";
 
 
 export async function handleUnitRegistration(
@@ -217,10 +218,14 @@ export async function handleUnitUpdateInput(
         case botCommands.setPhoto:
             const photos = message.photo as Array<{ file_id: string }>;
             await sendMessage({chat_id: chatId, text: JSON.stringify(photos)});
-            if(photos.length == 0 || photos.length > 1)
+            if(photos.length == 0)
                 await sendMessage({chat_id: chatId, text: 'МОЖНА ЗАВАНТАЖИТИ ТІЛЬКИ ОДНЕ ФОТО ДЛЯ ЛОГО'});
-            else
-                await sendMessage({chat_id: chatId, text: 'ФОТО Є'});
+            else {
+                    let photo = photos[photos.length-1];
+                    let file = await getFile({file_id: photo.file_id}).then(r => r.json());
+
+                    await sendMessage({chat_id: chatId, text: JSON.stringify(file)});
+                }
             break;
         default:
             await sendMessage({chat_id: chatId, text: strings.unknownRequest(action)})
