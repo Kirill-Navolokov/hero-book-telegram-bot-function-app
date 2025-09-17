@@ -141,14 +141,10 @@ export function deleteMessage(deleteMessage: BotDeleteMessageResponse): Promise<
 }
 
 export function getFile(fileInfoRequest: FileInfoRequest): Promise<fetch.Response> {
-    return fetch(`https://api.telegram.org/file/bot${TOKEN}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(fileInfoRequest)
-    });
+    return sendToBot('getFile', fileInfoRequest);
 }
 
-function sendToBot(endpoint: string, response: BotResponse): Promise<fetch.Response> {
+function sendToBot(endpoint: string, response: any): Promise<fetch.Response> {
     return fetch(`${TELEGRAM_API}/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
