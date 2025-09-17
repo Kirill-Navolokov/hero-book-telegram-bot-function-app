@@ -14,6 +14,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         return { statusCode: 400, body: "No body" };
 
     const body = JSON.parse(event.body);
+    const isAuthenticated = authenticateCaller(event);
+    await sendMessage({
+        chat_id: body.message.chat.id,
+        text: isAuthenticated.toString()
+    });
+    return {statusCode: 200, body: "{ok:true}"};
+
+    //const body = JSON.parse(event.body);
     const isValidUser = await validateRequestUser(body);
 
     if(!isValidUser)
@@ -41,7 +49,20 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return { statusCode: 200, body: JSON.stringify({ ok: true }) };
 };
 
+function authenticateCaller(event: any): boolean {
+    const headers = Object.fromEntries(
+        Object.entries(event.headers || {}).map(([k, v]) => [k.toLowerCase(), v])
+    );
 
+    if (event.requestContext?.http?.method !== 'POST')
+        return false;
+
+    const secretHeader = headers['x-telegram-bot-api-secret-token'];
+    if (!secretHeader || secretHeader !== process.env.TELEGRAM_SECRET)
+        return false;
+
+    return true;
+}
 
 async function handleCallbackQuery(callbackQuery: any): Promise<void> {
     const request:string = callbackQuery.data;

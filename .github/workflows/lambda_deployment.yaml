@@ -37,12 +37,6 @@ jobs:
           rm -f function.zip
           (cd dist && zip -r ../function.zip .)
           zip -r function.zip node_modules
-        # run: |
-        #   mkdir -p package
-        #   cp dist/handler.js package/
-        #   cp package.json package/
-        #   cp -r node_modules package/
-        #   cd package && zip -r ../function.zip .
       
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -50,6 +44,24 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-north-1   # change if needed
+      
+      - name: Get Lambda Function URL
+        id: lambda
+        run: |
+          set -euo pipefail
+          URL=$(aws lambda get-function-url-config --function-name "hero-book-dev-fa" --query 'FunctionUrl' --output text)
+          echo "url=${URL}" >> "$GITHUB_OUTPUT"
+      
+      - name: Generate TELEGRAM_SECRET
+        id: telegram_secret
+        run: |
+          node scripts/secretGenerator.js >> $GITHUB_OUTPUT
+
+      # - name: Set TELEGRAM_WEBHOOK_SECRET
+      #   run: |
+      #     curl -s "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/setWebhook" \
+      #     -F "url=${{ steps.lambda.outputs.url }}" \
+      #     -F "secret_token=${{ steps.telegram_secret.outputs.secret }}
 
       - name: Update AWS Lambda environment
         run: |
@@ -58,6 +70,7 @@ jobs:
             --environment "Variables={
               NODE_ENV=dev,
               TELEGRAM_TOKEN=${{ secrets.TELEGRAM_TOKEN }},
+              TELEGRAM_SECRET=${{ steps.telegram_secret.outputs.secret }},
               MONGO_CONNECTION_STRING=${{ secrets.MONGO_CONNECTION_STRING }},
               DB_NAME=${{ vars.DB_NAME }},
               DB_WODS_COLLECTION=${{ vars.DB_WODS_COLLECTION }},
