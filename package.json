@@ -12,10 +12,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "inversify": "^7.9.1",
     "mongodb": "^6.19.0",
-    "node-fetch": "^2.7.0",
-    "reflect-metadata": "^0.2.2"
+    "node-fetch": "^2.7.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.152",
