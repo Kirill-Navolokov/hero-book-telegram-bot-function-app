@@ -48,16 +48,14 @@ function getStartInlineKeyboard(
         keyboardButtons.push([{text: strings.registerUnit, callback_data: botCommands.registerUnit}]);
 
     if(unit != null) {
-        const text = unit.passedSignUp
-            ? strings.unitForgotPassword
-            : strings.unitShowOtp;
-        const action = unit.passedSignUp
-            ? botCommands.generateOtp
-            : botCommands.showOtp;
+        if(!unit.passedSignUp)
+            keyboardButtons.push([{
+                text: strings.unitShowOtp,
+                callback_data: botCommands.managementQuery('unit', unit._id.toString(), botCommands.showOtp)}]);
 
         keyboardButtons.push([{
-            text: text,
-            callback_data: botCommands.managementQuery('unit', unit._id.toString(), action)}]);
+            text: strings.unitForgotPassword,
+            callback_data: botCommands.managementQuery('unit', unit._id.toString(), botCommands.generateOtp)}]);
     }
 
     keyboardButtons.push([{text: strings.needMoreFunctionality, callback_data: botCommands.needMoreFunctionality}]);
