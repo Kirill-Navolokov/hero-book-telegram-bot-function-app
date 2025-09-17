@@ -8,6 +8,8 @@ export interface Unit {
     foundationDate?: Date;
     isPublished: boolean;
     socialNetworks?: {[type: number]: string},
+    otp: string;
+    passedSignUp: boolean;
     adminContact: {
         tgUserId: number;
         email: string;

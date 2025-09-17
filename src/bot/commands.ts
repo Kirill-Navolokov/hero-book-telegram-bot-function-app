@@ -8,19 +8,10 @@ export const botCommands = {
     rejectRequest: '/reject',
     management: '/management',
     registration: '/registration',
-    publish: '/publish',
-    unpublish: '/unpublish',
-    setPhoto: '/setPhoto',
-    setType: '/setType',
-    setUnitType: (type: number) => `/setType/${type}`,
-    setUnitFoundationDate: '/setDate',
-    delete: '/delete',
-    setName: '/setName',
-    setDescription: '/setDescription',
-    managementQuery: (entType: string, entId?: string, action?: string) =>
-        entId == undefined
-            ? `/management/${entType}`
-            : `/management/${entType}/${entId}/${action}`,
+    generateOtp: '/generateOtp',
+    showOtp: '/showOtp',
+    managementQuery: (entType: string, entId: string, action: string) =>
+        `/management/${entType}/${entId}/${action}`,
     approveQuery: (entType: string) => `/registration/approve/${entType}`,
     rejectQuery: (entType: string) => `/registration/reject/${entType}`,
     banQuery: (entType: string) => `/registration/ban/${entType}`

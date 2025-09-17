@@ -4,14 +4,11 @@ import { mongoClient } from "../handler";
 import { User } from "../models/user";
 import { strings } from "../bot/strings";
 import { botCommands } from "../bot/commands";
-import { deleteMessage, getFile, sendMessage } from "../bot/botService";
+import { deleteMessage, sendMessage } from "../bot/botService";
 import { TelegramAccountsRepository } from "../repositories/telegramAccountsRepository";
 import { UnitRegistration } from "../models/unitRegistration";
 import { UnitsRepository } from "../repositories/unitsRepository";
 import { Unit } from "../models/unit";
-import { send } from "process";
-import { json } from "stream/consumers";
-
 
 export async function handleUnitRegistration(
     user: User,
@@ -80,7 +77,7 @@ export async function handleUnitRegistrationResult(
         const unitsRepo = new UnitsRepository(db);
         const newUnit = await unitsRepo.createUnitFromRequest(registration);
 
-        userMessage = strings.unitApproved;
+        userMessage = strings.unitApproved(newUnit.otp);
         adminMessage = `Підрозділ ${newUnit.name} створено`;
     }
     else if (callbackData.includes('reject')) {
@@ -116,121 +113,19 @@ export async function handleUnitManagement(
     if(unit == null)
         return;
 
-    if(request == '/management/unit') {
-        await sendMessage({
-            chat_id: chatId,
-            text: strings.availableCommands,
-            reply_markup: {
-                inline_keyboard: await getAdminManagementKeyboard(unit)
-            }
-        });
-        return;
-    } else if(request.includes(botCommands.setPhoto)) {
-        await sendMessage({
-            chat_id: chatId,
-            text: botCommands.managementQuery('unit', unit._id.toString(), botCommands.setPhoto),
-            reply_markup: {
-                force_reply: true,
-                input_field_placeholder: strings.setPhoto
-            }
-        });
-       return; 
-    } else if(request.includes(botCommands.setName)) {
-        await sendMessage({
-            chat_id: chatId,
-            text: botCommands.managementQuery('unit', unit._id.toString(), botCommands.setName),
-            reply_markup: {
-                force_reply: true,
-                input_field_placeholder: strings.setName
-            }
-        });
-        return;
-    } else if(request.includes(botCommands.setDescription)) {
-        await sendMessage({
-            chat_id: chatId,
-            text: botCommands.managementQuery('unit', unit._id.toString(), botCommands.setDescription),
-            reply_markup: {
-                force_reply: true,
-                input_field_placeholder: strings.setDescription
-            }
-        });
-        return;
-    } else if(request.includes(botCommands.setUnitFoundationDate)) {
-        await sendMessage({
-            chat_id: chatId,
-            text: botCommands.managementQuery('unit', unit._id.toString(), botCommands.setUnitFoundationDate),
-            reply_markup: {
-                force_reply: true,
-                input_field_placeholder: strings.setFoundationDate
-            }
-        });
-        return;
-    } else if(request.includes(botCommands.setType)) {
-        const segmets = request.split('/');
-        await unitsRepo.setUnitType(unit._id, Number.parseInt(segmets.pop()!));
-    } else if(request.includes(botCommands.publish)) {
-        await unitsRepo.toggleUnitVisibility(unit._id, true);
-    } else if(request.includes(botCommands.unpublish)) {
-        await unitsRepo.toggleUnitVisibility(unit._id, false);
+    let text: string;
+
+    if(request.includes(botCommands.generateOtp)) {
+        const newOtp = await unitsRepo.generateNewOtp(unit._id);
+        text = strings.unitNewOtpGenerated(newOtp);
+    } else if(request.includes(botCommands.showOtp)) {
+        const otp = await unitsRepo.getOtp(unit._id);
+        text = strings.unitYourOtp(otp);
+    } else {
+        text = strings.unknownRequest(request);
     }
 
-    await sendMessage({chat_id: chatId, text: strings.changesApplied});
-}
-
-export async function handleUnitUpdateInput(
-    chatId: any,
-    user: User,
-    message: any
-): Promise<void> {
-    const unitsRepo = new UnitsRepository(mongoClient.db(process.env.DB_NAME));
-    const unit = await verifyUnitExists(chatId, user.id, unitsRepo);
-    if(unit == null)
-        return;
-
-    const requestSegments = (message.reply_to_message.text as string).split('/');
-    const updateText = message.text as string;
-    const action = '/' + requestSegments.pop()!;
-    switch(action) {
-        case botCommands.setName:
-            if(updateText.length == 0 || updateText.length > 20)
-                await sendMessage({chat_id: chatId, text: strings.nameValidation});
-            else {
-                await unitsRepo.setUnitName(unit._id, updateText);
-                await sendMessage({chat_id: chatId, text: strings.changesApplied});
-            }
-            break;
-        case botCommands.setDescription:
-            if(updateText.length == 0 || updateText.length > 1000)
-                await sendMessage({chat_id: chatId, text: strings.descriptionValidation});
-            else {
-                await unitsRepo.setUnitDescription(unit._id, updateText);
-                await sendMessage({chat_id: chatId, text: strings.changesApplied});
-            }
-            break;
-        case botCommands.setUnitFoundationDate:
-            const regex = /^\d{4}-\d{2}-\d{2}$/;
-            if(regex.test(updateText)) {
-                await unitsRepo.setUnitFoundationDate(unit._id, new Date(updateText));
-                await sendMessage({chat_id: chatId, text: strings.changesApplied});
-            } else
-                await sendMessage({chat_id: chatId, text: strings.foundationDateValidation});
-            break;
-        case botCommands.setPhoto:
-            const photos = message.photo as Array<{ file_id: string }>;
-            await sendMessage({chat_id: chatId, text: JSON.stringify(photos)});
-            if(photos.length == 0)
-                await sendMessage({chat_id: chatId, text: 'МОЖНА ЗАВАНТАЖИТИ ТІЛЬКИ ОДНЕ ФОТО ДЛЯ ЛОГО'});
-            else {
-                    let photo = photos[photos.length-1];
-                    let file = await getFile({file_id: photo.file_id}).then(r => r.json());
-
-                    await sendMessage({chat_id: chatId, text: JSON.stringify(file)});
-                }
-            break;
-        default:
-            await sendMessage({chat_id: chatId, text: strings.unknownRequest(action)})
-            break;
-    }
+    await sendMessage({chat_id: chatId, text: text});
 }
 
 async function verifyUnitRegistrationRequest(
@@ -260,56 +155,4 @@ async function verifyUnitExists(
         await sendMessage({chat_id: chatId, text: strings.unitNotReachable});
     
     return unit;
-}
-
-async function getAdminManagementKeyboard(
-    unit: Unit
-): Promise<Array<Array<{text: string, callback_data: string}>>> {
-    const isUnit = unit!.type == 0;
-    const unitIdString = unit!._id.toString();
-    const keyboard = [
-        [{
-            text: 'ЗМІНИТИ ФОТО',
-            callback_data: botCommands.managementQuery('unit', unitIdString, botCommands.setPhoto)}
-        ],
-        [{
-            text: 'ЗМІНИТИ НАЗВУ',
-            callback_data: botCommands.managementQuery('unit', unitIdString, botCommands.setName)}
-        ],
-        [{
-            text: 'ЗМІНИТИ ОПИС',
-            callback_data: botCommands.managementQuery('unit', unitIdString, botCommands.setDescription)}
-        ],
-        [{
-            text: 'ВСТАНОВИТИ ДАТУ ЗАСНУВАННЯ',
-            callback_data: botCommands.managementQuery('unit', unitIdString, botCommands.setUnitFoundationDate)
-        }],
-        unit!.type == undefined
-            ? [{
-                    text: 'СТАТИ МІЛІТАРІ СПІЛЬНОТОЮ',
-                    callback_data: botCommands.managementQuery('unit', unitIdString, botCommands.setUnitType(1))
-                },
-                {
-                    text: 'СТАТИ ПІДРОЗДІЛОМ',
-                    callback_data: botCommands.managementQuery('unit', unitIdString, botCommands.setUnitType(0))
-                }]
-            : [{
-                    text: isUnit ? 'СТАТИ МІЛІТАРІ СПІЛЬНОТОЮ' : 'СТАТИ ПІДРОЗДІЛОМ',
-                    callback_data: isUnit
-                        ? botCommands.managementQuery('unit', unitIdString, botCommands.setUnitType(1))
-                        : botCommands.managementQuery('unit', unitIdString, botCommands.setUnitType(0))
-                }],
-        [{
-            text: unit!.isPublished ? 'ПРИХОВАТИ ПІДРОЗДІЛ' : 'ОПУБЛІКУВАТИ ПІДРОЗДІЛ',
-            callback_data: unit!.isPublished
-                ? botCommands.managementQuery('unit', unitIdString, botCommands.unpublish)
-                : botCommands.managementQuery('unit', unitIdString, botCommands.publish)
-        }],
-        // [{
-        //     text: 'ВИДАЛИТИ ПІДРОЗДІЛ',
-        //     callback_data: botCommands.managementQuery('unit', unitIdString, botCommands.delete)
-        // }]
-    ];
-
-    return keyboard;
 }

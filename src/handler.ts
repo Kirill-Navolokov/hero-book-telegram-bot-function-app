@@ -4,7 +4,7 @@ import { greetUser, sendMessage, validateRequestUser } from "./bot/botService";
 import { botCommands } from "./bot/commands";
 import { strings } from "./bot/strings";
 import { User } from "./models/user";
-import { handleUnitManagement, handleUnitRegistration, handleUnitRegistrationResult, handleUnitUpdateInput } from "./commandHandlers/unitsHandler";
+import { handleUnitManagement, handleUnitRegistration, handleUnitRegistrationResult } from "./commandHandlers/unitsHandler";
 import { sendRandomWod } from "./commandHandlers/wodsHandler";
 
 export const mongoClient = new MongoClient(process.env.MONGO_CONNECTION_STRING!);
@@ -17,7 +17,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const isValidUser = await validateRequestUser(body);
 
     if(!isValidUser)
-        // ALSO CHECK IF USER IS KNOWN
         return { statusCode: 200, body: JSON.stringify({ message: 'Request user validation failed' }) };
 
     if(body.callback_query) {
@@ -59,12 +58,14 @@ async function handleCallbackQuery(callbackQuery: any): Promise<void> {
             text: strings.unitRegistrationExplanation,
             reply_markup: {force_reply: true}
         });
-    } else if(request == botCommands.registerVeteranBusiness) {
-        await sendMessage({
-            chat_id: chatId,
-            text: ''
-        });
-    } else if(request.startsWith(botCommands.registration)) {
+    } 
+    // else if(request == botCommands.registerVeteranBusiness) {
+    //     await sendMessage({
+    //         chat_id: chatId,
+    //         text: ''
+    //     });
+    // }
+    else if(request.startsWith(botCommands.registration)) {
         if(request.includes('unit')){
             await handleUnitRegistrationResult(
                 chatId,
@@ -95,10 +96,6 @@ async function handleReplyMessage(message: any): Promise<void> {
         await handleUnitRegistration(user, chatId, message.text);
     } else if (text.startsWith(strings.businessRegistration)) {
         //await handleBusinessRegistration(user, chatId, text);
-    } else if (text.startsWith(botCommands.management)) {
-        if(text.includes('unit')) {
-            await handleUnitUpdateInput(chatId, user, message);
-        }
     } else {
         await sendMessage({chat_id: chatId, text: strings.unknownRequest(text)});
     }

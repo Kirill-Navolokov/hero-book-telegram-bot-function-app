@@ -1,7 +1,6 @@
 import fetch from "node-fetch";
 import BotPhotoResponse from "../models/botPhotoResponse";
 import BotTextResponse from "../models/botTextResponse";
-import BotResponse from "../models/botResponse";
 import { User } from "../models/user";
 import { TelegramAccountsRepository } from "../repositories/telegramAccountsRepository";
 import { mongoClient } from "../handler";
@@ -10,7 +9,7 @@ import { botCommands } from "./commands";
 import BotDeleteMessageResponse from "../models/botDeleteMessageResponse";
 import { UnitRegistrationsRepository } from "../repositories/unitRegistrationsRepository";
 import { UnitsRepository } from "../repositories/unitsRepository";
-import { FileInfoRequest } from "../models/fileIntoRequest";
+import { Unit } from "../models/unit";
 
 const TOKEN = process.env.TELEGRAM_TOKEN!;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
@@ -18,20 +17,18 @@ const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
 export async function greetUser(chatId: string, userId: number): Promise<fetch.Response> {
     const unitRegistrationsRepo = new UnitRegistrationsRepository(mongoClient.db(process.env.DB_NAME));
     const unitRequestUnderReview = await unitRegistrationsRepo.requestFromUserExists(userId);
-    let unitOrBusinessName: string|undefined;
+    let unit: Unit|null = null;
 
     if(!unitRequestUnderReview) {
         const unitsRepo = new UnitsRepository(mongoClient.db(process.env.DB_NAME));
-        const unit = await unitsRepo.getUnitByAdminTgId(userId);
-        if(unit != null)
-            unitOrBusinessName = unit.name;
+        unit = await unitsRepo.getUnitByAdminTgId(userId);
     }
 
     let responseMessage: BotTextResponse = {
         chat_id: chatId,
-        text: getGreetingMessage(unitRequestUnderReview, unitOrBusinessName),
+        text: getGreetingMessage(unitRequestUnderReview, unit),
         reply_markup: {
-            inline_keyboard: getStartInlineKeyboard(unitRequestUnderReview, unitOrBusinessName != undefined)
+            inline_keyboard: getStartInlineKeyboard(unitRequestUnderReview, unit)
         }
     }
 
@@ -40,20 +37,27 @@ export async function greetUser(chatId: string, userId: number): Promise<fetch.R
 
 function getStartInlineKeyboard(
     unitRequestUnderReview: boolean,
-    unitAdmin: boolean
+    unit: Unit|null
 ) : Array<Array<{text: string; callback_data: string}>> {
     const keyboardButtons = [
         [{text: strings.getRandomWod, callback_data: botCommands.randomWod}],
-        [{text: strings.reginsterVeteranBusiness, callback_data: botCommands.registerVeteranBusiness}]
+        //[{text: strings.reginsterVeteranBusiness, callback_data: botCommands.registerVeteranBusiness}]
     ]
 
-    if(!unitRequestUnderReview && !unitAdmin)
+    if(!unitRequestUnderReview && unit == null)
         keyboardButtons.push([{text: strings.registerUnit, callback_data: botCommands.registerUnit}]);
 
-    if(unitAdmin) {
+    if(unit != null) {
+        const text = unit.passedSignUp
+            ? strings.unitForgotPassword
+            : strings.unitShowOtp;
+        const action = unit.passedSignUp
+            ? botCommands.generateOtp
+            : botCommands.showOtp;
+
         keyboardButtons.push([{
-            text: strings.unitManagement,
-            callback_data: botCommands.managementQuery('unit')}]);
+            text: text,
+            callback_data: botCommands.managementQuery('unit', unit._id.toString(), action)}]);
     }
 
     keyboardButtons.push([{text: strings.needMoreFunctionality, callback_data: botCommands.needMoreFunctionality}]);
@@ -61,13 +65,13 @@ function getStartInlineKeyboard(
     return keyboardButtons;
 }
 
-function getGreetingMessage(underReview: boolean, name?: string): string {
+function getGreetingMessage(underReview: boolean, unit: Unit|null): string {
     if(underReview)
         return strings.greetUnderReviewUser;
 
-    return name == undefined
+    return unit == null
         ? strings.greetUnknownUser 
-        : strings.greetKnownUser(name!);
+        : strings.greetKnownUser(unit.name);
 }
 
 export async function validateRequestUser(body: any): Promise<boolean> {
@@ -138,10 +142,6 @@ export function sendPhoto(responseMessage: BotPhotoResponse): Promise<fetch.Resp
 
 export function deleteMessage(deleteMessage: BotDeleteMessageResponse): Promise<fetch.Response> {
     return sendToBot('deleteMessage', deleteMessage);
-}
-
-export function getFile(fileInfoRequest: FileInfoRequest): Promise<fetch.Response> {
-    return sendToBot('getFile', fileInfoRequest);
 }
 
 function sendToBot(endpoint: string, response: any): Promise<fetch.Response> {

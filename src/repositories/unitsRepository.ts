@@ -17,6 +17,8 @@ export class UnitsRepository extends BaseRepository {
             _id: new ObjectId(),
             isPublished: false,
             name: request.name,
+            passedSignUp: false,
+            otp: this.generateOtp(),
             adminContact: {
                 tgUserId: request.userId!,
                 email: request.adminEmail
@@ -29,6 +31,28 @@ export class UnitsRepository extends BaseRepository {
 
         return unit;
     }
+    
+
+    public async generateNewOtp(id: ObjectId): Promise<string> {
+        const otp = this.generateOtp();
+        const updateQuery = {
+            $set: {
+                otp: otp,
+                passedSignUp: false
+            }
+        };
+
+        await this.updateUnit(id, updateQuery);
+
+        return otp;
+    }
+
+    public async getOtp(id: ObjectId): Promise<string> {
+        const collection = this.getCollection<Unit>();
+        const unit = await collection.findOne({_id: id});
+
+        return unit!.otp;
+    }
 
     public async getUnitByAdminTgId(userId: number): Promise<Unit | null> {
         const collection = this.getCollection<Unit>();
@@ -37,48 +61,59 @@ export class UnitsRepository extends BaseRepository {
         return result;
     }
 
-    public async toggleUnitVisibility(id: ObjectId, isPublished: boolean): Promise<void> {
-        const updateQuery = {
-            $set: {isPublished: isPublished}
-        };
+    // public async toggleUnitVisibility(id: ObjectId, isPublished: boolean): Promise<void> {
+    //     const updateQuery = {
+    //         $set: {isPublished: isPublished}
+    //     };
 
-        return this.updateUnit(id, updateQuery);
-    }
+    //     return this.updateUnit(id, updateQuery);
+    // }
 
-    public async setUnitType(id: ObjectId, type: number): Promise<void> {
-        const updateQuery = {
-            $set: {type: type}
-        };
+    // public async setUnitType(id: ObjectId, type: number): Promise<void> {
+    //     const updateQuery = {
+    //         $set: {type: type}
+    //     };
 
-        return this.updateUnit(id, updateQuery);
-    }
+    //     return this.updateUnit(id, updateQuery);
+    // }
 
-    public async setUnitName(id: ObjectId, name: string): Promise<void> {
-        const updateQuery = {
-            $set: {name: name}
-        };
+    // public async setUnitName(id: ObjectId, name: string): Promise<void> {
+    //     const updateQuery = {
+    //         $set: {name: name}
+    //     };
 
-        return this.updateUnit(id, updateQuery);
-    }
+    //     return this.updateUnit(id, updateQuery);
+    // }
 
-    public async setUnitDescription(id: ObjectId, description: string): Promise<void> {
-        const updateQuery = {
-            $set: {description: description}
-        };
+    // public async setUnitDescription(id: ObjectId, description: string): Promise<void> {
+    //     const updateQuery = {
+    //         $set: {description: description}
+    //     };
 
-        return this.updateUnit(id, updateQuery);
-    }
+    //     return this.updateUnit(id, updateQuery);
+    // }
 
-    public async setUnitFoundationDate(id: ObjectId, foundationDate: Date): Promise<void> {
-        const updateQuery = {
-            $set: {foundationDate: foundationDate}
-        };
+    // public async setUnitFoundationDate(id: ObjectId, foundationDate: Date): Promise<void> {
+    //     const updateQuery = {
+    //         $set: {foundationDate: foundationDate}
+    //     };
 
-        return this.updateUnit(id, updateQuery);
-    }
+    //     return this.updateUnit(id, updateQuery);
+    // }
 
     private async updateUnit(id: ObjectId, updateQuery: UpdateFilter<Unit>): Promise<void> {
         const collection = this.getCollection<Unit>();
         await collection.findOneAndUpdate({_id: id}, updateQuery);
+    }
+
+    private generateOtp(length: number = 12): string {
+        const char = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_-+=";
+        let password = "";
+        for (let i = 0; i < length; i++) {
+            const ind = Math.floor(Math.random() * char.length);
+            password += char[ind];
+        }
+
+        return password;
     }
 }
