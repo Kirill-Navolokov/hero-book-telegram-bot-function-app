@@ -119,14 +119,6 @@ export async function validateRequestUser(body: any): Promise<boolean> {
         return false;
     }
 
-    if(user.username == undefined) {
-        await sendMessage({
-            chat_id: chatId,
-            text: strings.usernameNotDefined
-        });
-        return false;
-    }
-
     return true;
 }
 
