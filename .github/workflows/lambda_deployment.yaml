@@ -60,8 +60,8 @@ jobs:
       - name: Set TELEGRAM_SECRET
         run: |
           curl -s "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/setWebhook" \
-          -F "url=${{ steps.lambda.outputs.url }}" \
-          -F "secret_token=${{ steps.telegram_secret.outputs.secret }}
+          -d "url=${{ steps.lambda.outputs.url }}" \
+          -d "secret_token=${{ steps.telegram_secret.outputs.secret }}
 
       - name: Update AWS Lambda environment
         run: |
