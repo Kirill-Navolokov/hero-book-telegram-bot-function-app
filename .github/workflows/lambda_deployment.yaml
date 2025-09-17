@@ -59,7 +59,7 @@ jobs:
 
       - name: Set TELEGRAM_SECRET
         run: |
-          curl -s "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/setWebhook" \
+          curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/setWebhook" \
           -d "url=${{ steps.lambda.outputs.url }}" \
           -d "secret_token=${{ steps.telegram_secret.outputs.secret }}
 
