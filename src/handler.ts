@@ -50,15 +50,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 };
 
 function authenticateCaller(event: any): boolean {
-    const headers = event.headers || {};
-    // Object.fromEntries(
-    //     Object.entries(event.headers || {}).map(([k, v]) => [k.toLowerCase(), v])
-    // );
+    const headers = Object.fromEntries(
+        Object.entries(event.headers || {}).map(([k, v]) => [k.toLowerCase(), v])
+    );
 
     if (event.requestContext?.http?.method !== 'POST')
         return false;
 
-    const secretHeader = headers['X-Telegram-Bot-Api-Secret-Token'];
+    const secretHeader = headers['x-telegram-bot-api-secret-token'];
     if (!secretHeader || secretHeader !== process.env.TELEGRAM_SECRET)
         return false;
 
