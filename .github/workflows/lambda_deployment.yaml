@@ -61,6 +61,7 @@ jobs:
         run: |
           set -euo pipefail
           resp="$(curl -sS --fail-with-body -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/setWebhook" \
+            -H "Content-Type: application/json" \
             -d '{"url":"${{ steps.lambda.outputs.url }}", "secret_token":"${{ steps.telegram_secret.outputs.secret }}"}')"
           echo "Response: $resp"
 
