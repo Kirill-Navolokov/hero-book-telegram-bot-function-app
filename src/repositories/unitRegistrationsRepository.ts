@@ -40,4 +40,11 @@ export class UnitRegistrationsRepository extends BaseRepository {
 
         return uniRegistration != null;
     }
+
+    public async getRequestByAdminEmail(email: string): Promise<UnitRegistration | null> {
+        const collection = this.getCollection<UnitRegistration>();
+        const uniRegistration = await collection.findOne({adminEmail: email});
+    
+        return uniRegistration;
+    }
 }

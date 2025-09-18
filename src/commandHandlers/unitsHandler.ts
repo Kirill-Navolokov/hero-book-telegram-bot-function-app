@@ -15,8 +15,8 @@ export async function handleUnitRegistration(
     chatId: number,
     registrationRequest: string
 ): Promise<void> {
-    const unitsRepo = new UnitRegistrationsRepository(mongoClient.db(process.env.DB_NAME));
-    if(await unitsRepo.requestFromUserExists(user.id)) {
+    const unitRegistrationsRepo = new UnitRegistrationsRepository(mongoClient.db(process.env.DB_NAME));
+    if(await unitRegistrationsRepo.requestFromUserExists(user.id)) {
         await sendMessage({
             chat_id: chatId,
             text: strings.unitRegistrationExists
@@ -29,9 +29,18 @@ export async function handleUnitRegistration(
         if(unitRegistration == null)
             return;
 
+        const unitsRepo = new UnitsRepository(mongoClient.db(process.env.DB_NAME));
+        const unit = await unitsRepo.getUnitByAdminEmail(unitRegistration.adminEmail);
+        const existingRequest = await unitRegistrationsRepo.getRequestByAdminEmail(unitRegistration.adminEmail);
+        if(unit != null || existingRequest != null) {
+            await sendMessage({chat_id: chatId, text: strings.emailAlreadyInUse(unitRegistration.adminEmail)});
+            return;
+        }
+
+
         unitRegistration._id = new ObjectId();
         unitRegistration.userId = user.id;
-        unitRegistration = await unitsRepo.add(unitRegistration!);
+        unitRegistration = await unitRegistrationsRepo.add(unitRegistration!);
         const registrationId = unitRegistration._id!.toString();
 
         await sendMessage({

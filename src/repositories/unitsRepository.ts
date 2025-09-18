@@ -61,6 +61,13 @@ export class UnitsRepository extends BaseRepository {
         return result;
     }
 
+    public async getUnitByAdminEmail(email: string): Promise<Unit | null> {
+        const collection = this.getCollection<Unit>();
+        const result = await collection.findOne({'adminContact.email': email});
+
+        return result;
+    }
+
     private async updateUnit(id: ObjectId, updateQuery: UpdateFilter<Unit>): Promise<void> {
         const collection = this.getCollection<Unit>();
         await collection.findOneAndUpdate({_id: id}, updateQuery);

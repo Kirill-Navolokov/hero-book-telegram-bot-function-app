@@ -47,5 +47,8 @@ export const strings = {
     },
     wodMessageTemplate: (name: string, date: Date, scheme: string) => {
         return `${name}\nДата виконання: ${date.toLocaleDateString("uk-UA", {month:'long',day:'numeric'})}\n\nСхема:\n${scheme}`;
+    },
+    emailAlreadyInUse: (email: string) => {
+        return `Пошта: ${email} вже використовується`;
     }
 }
