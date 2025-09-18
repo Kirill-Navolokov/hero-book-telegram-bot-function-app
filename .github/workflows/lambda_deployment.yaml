@@ -58,10 +58,11 @@ jobs:
           node scripts/secretGenerator.js >> $GITHUB_OUTPUT
 
       - name: Set TELEGRAM_SECRET
-        run: |
+        run: | # set -euo pipefail
           curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/setWebhook" \
-          -d "url=${{ steps.lambda.outputs.url }}" \
-          -d "secret_token=${{ steps.telegram_secret.outputs.secret }}
+          -d '{url:${{ steps.lambda.outputs.url }}, secret_token:${{ steps.telegram_secret.outputs.secret }}}'
+        # url=${{ steps.lambda.outputs.url }}" \
+        # "secret_token=${{ steps.telegram_secret.outputs.secret }}
 
       - name: Update AWS Lambda environment
         run: |
