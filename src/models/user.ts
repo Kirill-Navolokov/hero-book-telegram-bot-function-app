@@ -1,4 +1,12 @@
+import { ObjectId } from "mongodb";
+import { RoleType } from "./roleType";
+
 export interface User {
-    id: number;
-    is_bot: boolean;
+    _id: ObjectId,
+    email: string;
+    passedSignUp: boolean,
+    otp?: string,
+    encryptedPassword?: string;
+    roles: RoleType[],
+    tgUserId?: number
 }

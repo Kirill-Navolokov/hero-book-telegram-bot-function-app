@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import BotPhotoResponse from "../models/botPhotoResponse";
 import BotTextResponse from "../models/botTextResponse";
-import { User } from "../models/user";
+import { TgUser } from "../models/tgUser";
 import { TelegramAccountsRepository } from "../repositories/telegramAccountsRepository";
 import { mongoClient } from "../handler";
 import { strings } from "./strings";
@@ -10,25 +10,28 @@ import BotDeleteMessageResponse from "../models/botDeleteMessageResponse";
 import { UnitRegistrationsRepository } from "../repositories/unitRegistrationsRepository";
 import { UnitsRepository } from "../repositories/unitsRepository";
 import { Unit } from "../models/unit";
+import { User } from "../models/user";
+import { UsersRepository } from "../repositories/usersRepository";
 
 const TOKEN = process.env.TELEGRAM_TOKEN!;
 const TELEGRAM_API = `https://api.telegram.org/bot${TOKEN}`;
 
 export async function greetUser(chatId: string, userId: number): Promise<fetch.Response> {
-    const unitRegistrationsRepo = new UnitRegistrationsRepository(mongoClient.db(process.env.DB_NAME));
+    const db = mongoClient.db(process.env.DB_NAME);
+    const unitRegistrationsRepo = new UnitRegistrationsRepository(db);
     const unitRequestUnderReview = await unitRegistrationsRepo.requestFromUserExists(userId);
-    let unit: Unit|null = null;
+    let user: User|null = null;
 
     if(!unitRequestUnderReview) {
-        const unitsRepo = new UnitsRepository(mongoClient.db(process.env.DB_NAME));
-        unit = await unitsRepo.getUnitByAdminTgId(userId);
+        const usersRepo = new UsersRepository(db);
+        user = await usersRepo.getByTelegramId(userId);
     }
 
     let responseMessage: BotTextResponse = {
         chat_id: chatId,
-        text: getGreetingMessage(unitRequestUnderReview, unit),
+        text: getGreetingMessage(unitRequestUnderReview, user),
         reply_markup: {
-            inline_keyboard: getStartInlineKeyboard(unitRequestUnderReview, unit)
+            inline_keyboard: getStartInlineKeyboard(unitRequestUnderReview, user)
         }
     }
 
@@ -37,25 +40,25 @@ export async function greetUser(chatId: string, userId: number): Promise<fetch.R
 
 function getStartInlineKeyboard(
     unitRequestUnderReview: boolean,
-    unit: Unit|null
+    user: User|null
 ) : Array<Array<{text: string; callback_data: string}>> {
     const keyboardButtons = [
         [{text: strings.getRandomWod, callback_data: botCommands.randomWod}],
         //[{text: strings.reginsterVeteranBusiness, callback_data: botCommands.registerVeteranBusiness}]
     ]
 
-    if(!unitRequestUnderReview && unit == null)
+    if(!unitRequestUnderReview && user == null)
         keyboardButtons.push([{text: strings.registerUnit, callback_data: botCommands.registerUnit}]);
 
-    if(unit != null) {
-        if(!unit.passedSignUp)
+    if(user != null) {
+        if(!user.passedSignUp)
             keyboardButtons.push([{
                 text: strings.unitShowOtp,
-                callback_data: botCommands.managementQuery('unit', unit._id.toString(), botCommands.showOtp)}]);
+                callback_data: botCommands.managementQuery('user', user._id.toString(), botCommands.showOtp)}]);
 
         keyboardButtons.push([{
             text: strings.unitForgotPassword,
-            callback_data: botCommands.managementQuery('unit', unit._id.toString(), botCommands.generateOtp)}]);
+            callback_data: botCommands.managementQuery('user', user._id.toString(), botCommands.generateOtp)}]);
     }
 
     keyboardButtons.push([{text: strings.needMoreFunctionality, callback_data: botCommands.needMoreFunctionality}]);
@@ -63,26 +66,26 @@ function getStartInlineKeyboard(
     return keyboardButtons;
 }
 
-function getGreetingMessage(underReview: boolean, unit: Unit|null): string {
+function getGreetingMessage(underReview: boolean, user: User|null): string {
     if(underReview)
         return strings.greetUnderReviewUser;
 
-    return unit == null
+    return user == null
         ? strings.greetUnknownUser 
-        : strings.greetKnownUser(unit.name);
+        : strings.greetKnownUser(user.email);
 }
 
 export async function validateRequestUser(body: any): Promise<boolean> {
-    let user: User | undefined = undefined;
+    let user: TgUser | undefined = undefined;
     let chatId;
     let message = '';
 
     if(body.message) {
-        user = body.message.from as User;
+        user = body.message.from as TgUser;
         chatId = body.message.chat.id;
         message = body.message.text;
     } else if(body.callback_query) {
-        user = body.callback_query.from as User;
+        user = body.callback_query.from as TgUser;
         chatId = body.callback_query.message.chat.id;
         message = body.callback_query.data;
     }

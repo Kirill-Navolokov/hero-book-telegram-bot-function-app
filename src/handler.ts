@@ -3,9 +3,10 @@ import { MongoClient } from "mongodb";
 import { greetUser, sendMessage, validateRequestUser } from "./bot/botService";
 import { botCommands } from "./bot/commands";
 import { strings } from "./bot/strings";
-import { User } from "./models/user";
-import { handleUnitManagement, handleUnitRegistration, handleUnitRegistrationResult } from "./commandHandlers/unitsHandler";
+import { TgUser } from "./models/tgUser";
+import { handleUnitRegistration, handleUnitRegistrationResult } from "./commandHandlers/unitsHandler";
 import { sendRandomWod } from "./commandHandlers/wodsHandler";
+import { handleUserManagement } from "./commandHandlers/usersHandler";
 
 export const mongoClient = new MongoClient(process.env.MONGO_CONNECTION_STRING!);
 
@@ -63,7 +64,7 @@ function authenticateCaller(event: any): boolean {
 async function handleCallbackQuery(callbackQuery: any): Promise<void> {
     const request:string = callbackQuery.data;
     const chatId = callbackQuery.message.chat.id;
-    const user = callbackQuery.from as User;
+    const user = callbackQuery.from as TgUser;
 
     if(request == botCommands.randomWod) {
         await sendRandomWod(chatId);
@@ -93,8 +94,8 @@ async function handleCallbackQuery(callbackQuery: any): Promise<void> {
             //handle business registration
         }
     } else if(request.startsWith(botCommands.management)) {
-        if(request.includes('unit')) {
-            await handleUnitManagement(chatId, user.id, request);
+        if(request.includes('user')) {
+            await handleUserManagement(chatId, user.id, request);
         } else {
             //await handleBusinessManagement(callbackQuery);
         }
@@ -106,7 +107,7 @@ async function handleCallbackQuery(callbackQuery: any): Promise<void> {
 
 async function handleReplyMessage(message: any): Promise<void> {
     const text = message.reply_to_message.text as string;
-    const user = message.from as User;
+    const user = message.from as TgUser;
     const chatId = message.chat.id;
 
     if(text.startsWith(strings.unitRegistration)) {

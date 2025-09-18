@@ -8,7 +8,7 @@ export const strings = {
     needMoreFunctionality: 'Чому так мало функціоналу?',
     unitForgotPassword: 'Згенерувати одноразовий пароль',
     unitShowOtp: 'Показати одноразовий пароль',
-    unitNotReachable: 'Підрозділ більше не доступний. Введіть /start щоб подивитись доступний функціонал.',
+    userNotReachable: 'Користувач більше не доступний. Введіть /start щоб подивитись доступний функціонал.',
     unitRegistration: 'РЕЄСТРАЦІЯ ПІДРОЗДІЛУ',
     businessRegistration: 'РЕЄСТРАЦІЯ БІЗНЕСУ',
     unitRegistrationExplanation: `РЕЄСТРАЦІЯ ПІДРОЗДІЛУ\n
@@ -32,8 +32,9 @@ export const strings = {
     unitRegistrationExists: 'Ви вже стоврили запит на підрозділ, він на розгляді.',
     uknownErrorHappend: 'На нашому боці сталась помилка. Працюємо над її виправленням.',
     unitApproved: (otp: string) => `Ваш підрозділ було зареєстровано.\nВикористайте цей код, для першого входу в додаток:\n${otp}.\nТам ви зможете додати інформацію та опублікувати його.`,
-    unitNewOtpGenerated: (otp: string) => `Використайте цей код, як під час першого входу в додаток: \n${otp}`,
-    unitYourOtp: (otp: string) => `Ваш одноразовий пароль для першого входу в додаток:\n${otp}`,
+    userNewOtpGenerated: (otp: string) => `Використайте цей код, як під час першого входу в додаток: \n${otp}`,
+    userYourOtp: (otp: string) => `Ваш одноразовий пароль для першого входу в додаток:\n${otp}`,
+    optNotExits: 'Однаразовий пароль відсутній',
     unitRejected: 'Ваш запит на реєстрацію підрозділу було відхилено.',
 
     greetKnownUser: (name: string) => {

@@ -1,21 +1,22 @@
 import { ObjectId } from "mongodb";
 import { UnitRegistrationsRepository } from "../repositories/unitRegistrationsRepository";
 import { mongoClient } from "../handler";
-import { User } from "../models/user";
+import { TgUser } from "../models/tgUser";
 import { strings } from "../bot/strings";
 import { botCommands } from "../bot/commands";
 import { deleteMessage, sendMessage } from "../bot/botService";
 import { TelegramAccountsRepository } from "../repositories/telegramAccountsRepository";
 import { UnitRegistration } from "../models/unitRegistration";
 import { UnitsRepository } from "../repositories/unitsRepository";
-import { Unit } from "../models/unit";
+import { createUserFromUnitRequest, generateOtp, getByEmail } from "./usersHandler";
 
 export async function handleUnitRegistration(
-    user: User,
+    user: TgUser,
     chatId: number,
     registrationRequest: string
 ): Promise<void> {
-    const unitRegistrationsRepo = new UnitRegistrationsRepository(mongoClient.db(process.env.DB_NAME));
+    const db = mongoClient.db(process.env.DB_NAME);
+    const unitRegistrationsRepo = new UnitRegistrationsRepository(db);
     if(await unitRegistrationsRepo.requestFromUserExists(user.id)) {
         await sendMessage({
             chat_id: chatId,
@@ -29,19 +30,16 @@ export async function handleUnitRegistration(
         if(unitRegistration == null)
             return;
 
-        const unitsRepo = new UnitsRepository(mongoClient.db(process.env.DB_NAME));
-        const unit = await unitsRepo.getUnitByAdminEmail(unitRegistration.adminEmail);
+        const existinUser = await getByEmail(unitRegistration.adminEmail);
         const existingRequest = await unitRegistrationsRepo.getRequestByAdminEmail(unitRegistration.adminEmail);
-        if(unit != null || existingRequest != null) {
+        if(existinUser != null || existingRequest != null) {
             await sendMessage({chat_id: chatId, text: strings.emailAlreadyInUse(unitRegistration.adminEmail)});
             return;
         }
 
-
         unitRegistration._id = new ObjectId();
         unitRegistration.userId = user.id;
         unitRegistration = await unitRegistrationsRepo.add(unitRegistration!);
-        const registrationId = unitRegistration._id!.toString();
 
         await sendMessage({
             chat_id: (process.env.HERO_BOOK_ADMIN_GROUP as unknown) as number,
@@ -83,10 +81,12 @@ export async function handleUnitRegistrationResult(
     let adminMessage;
 
     if(callbackData.includes('approve')) {
+        const createdUser = await createUserFromUnitRequest(registration);
         const unitsRepo = new UnitsRepository(db);
-        const newUnit = await unitsRepo.createUnitFromRequest(registration);
+        const newUnit = await unitsRepo.createUnitFromRequest(registration, createdUser._id);
+        const otp = await generateOtp(createdUser._id);
 
-        userMessage = strings.unitApproved(newUnit.otp);
+        userMessage = strings.unitApproved(otp);
         adminMessage = `Підрозділ ${newUnit.name} створено`;
     }
     else if (callbackData.includes('reject')) {
@@ -112,31 +112,6 @@ export async function handleUnitRegistrationResult(
     await sendMessage({chat_id: chatId, text: adminMessage});
 }
 
-export async function handleUnitManagement(
-    chatId: any,
-    userId: number,
-    request: string
-): Promise<void> {
-    const unitsRepo = new UnitsRepository(mongoClient.db(process.env.DB_NAME));
-    const unit = await verifyUnitExists(chatId, userId, unitsRepo);
-    if(unit == null)
-        return;
-
-    let text: string;
-
-    if(request.includes(botCommands.generateOtp)) {
-        const newOtp = await unitsRepo.generateNewOtp(unit._id);
-        text = strings.unitNewOtpGenerated(newOtp);
-    } else if(request.includes(botCommands.showOtp)) {
-        const otp = await unitsRepo.getOtp(unit._id);
-        text = strings.unitYourOtp(otp);
-    } else {
-        text = strings.unknownRequest(request);
-    }
-
-    await sendMessage({chat_id: chatId, text: text});
-}
-
 async function verifyUnitRegistrationRequest(
     registrationRequest: string,
     chatId: number
@@ -152,16 +127,4 @@ async function verifyUnitRegistrationRequest(
         });
         return null;
     }
-}
-
-async function verifyUnitExists(
-    chatId: any,
-    adminTgId: number,
-    unitsRepo: UnitsRepository
-): Promise<Unit | null> {
-    const unit = await unitsRepo.getUnitByAdminTgId(adminTgId);
-    if(unit == null)
-        await sendMessage({chat_id: chatId, text: strings.unitNotReachable});
-    
-    return unit;
 }
