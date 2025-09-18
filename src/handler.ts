@@ -12,16 +12,12 @@ export const mongoClient = new MongoClient(process.env.MONGO_CONNECTION_STRING!)
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     if (!event.body)
         return { statusCode: 400, body: "No body" };
+        
+    const isAuthenticated = authenticateCaller(event);
+    if(!isAuthenticated)
+        return {statusCode: 200, body: "{ok:true}"};
 
     const body = JSON.parse(event.body);
-    const isAuthenticated = authenticateCaller(event);
-    await sendMessage({
-        chat_id: body.message.chat.id,
-        text: isAuthenticated.toString()
-    });
-    return {statusCode: 200, body: "{ok:true}"};
-
-    //const body = JSON.parse(event.body);
     const isValidUser = await validateRequestUser(body);
 
     if(!isValidUser)
