@@ -79,7 +79,8 @@ jobs:
               HERO_BOOK_ADMIN_GROUP=${{ vars.HERO_BOOK_ADMIN_GROUP }},
               DB_TG_BAN_COLLECTION=${{ vars.DB_TG_BAN_COLLECTION }},
               DB_UNIT_REQUESTS_COLLECTION=${{ vars.DB_UNIT_REQUESTS_COLLECTION }},
-              DB_UNITS_COLLECTION=${{ vars.DB_UNITS_COLLECTION }}
+              DB_UNITS_COLLECTION=${{ vars.DB_UNITS_COLLECTION }},
+              DB_USERS_COLLECTION=${{ vars.DB_USERS_COLLECTION }}
             }"
 
       - name: Deploy to AWS Lambda
